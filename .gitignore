@@ -1,0 +1,44 @@
+# virtual environments
+.venv/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+
+# local app data
+uploads/
+outputs/
+data/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Excel temp locks
+~$*.xlsx
+~$*.xls
+*.xlsx
+*.xls
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/

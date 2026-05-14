@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "basic_sw_tech"
+version = "0.1.0"
+description = "Streamlit UI: Ollama chat, Excel upload/list/delete, merge with averaging, Markdown export."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "basic-sw-tech" }]
+dependencies = [
+    "streamlit>=1.28,<2",
+    "pandas>=2.0,<3",
+    "openpyxl>=3.1,<4",
+    "httpx>=0.25,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+excel-ai-chat = "excel_ai_chat.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["excel_ai_chat*"]
+
+[tool.setuptools.package-data]
+excel_ai_chat = ["static/*.png"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

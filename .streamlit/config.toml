@@ -1,0 +1,3 @@
+# 기본 포트 (8501 충돌 시 여기 또는 STREAMLIT_SERVER_PORT로 변경)
+[server]
+port = 8502
