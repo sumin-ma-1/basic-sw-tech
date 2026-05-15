@@ -1,1 +1,1 @@
-.\.venv\Scripts\Activate.ps1
+# Local notes — activate venv: .\.venv\Scripts\Activate.ps1

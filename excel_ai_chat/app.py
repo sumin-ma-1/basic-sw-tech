@@ -40,14 +40,74 @@ def _init_state() -> None:
 
 WELCOME_HEADING = "Welcome to our basic software technology"
 
-# Flaticon 고래 아이콘 사용 시 출처 표기
-FLATICON_WHALE_ATTR_HTML = (
-    '<a href="https://www.flaticon.com/kr/free-icons/" title="고래 아이콘">고래 아이콘 제작자: iconfield - Flaticon</a>'
+# Flaticon otter (수달) icon attribution
+FLATICON_OTTER_ATTR_HTML = (
+    '<a href="https://www.flaticon.com/free-icons/otter" title="otter icons">'
+    "otter icons created by iconfield - Flaticon</a>"
 )
 
 
+def _inject_chat_wait_styles() -> None:
+    """Inject CSS for the chat-tab waiting dots (once per session)."""
+    if st.session_state.get("_bst_chat_wait_css"):
+        return
+    st.markdown(
+        """
+<style>
+@keyframes bst-wait-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+@keyframes bst-wait-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+.bst-wait-wrap {
+  font-size: 0.95rem;
+  color: #5c6570;
+  margin: 0.1rem 0 0.5rem 0;
+}
+.bst-wait-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.bst-wait-label {
+  animation: bst-wait-pulse 1.25s ease-in-out infinite;
+}
+.bst-wait-dots {
+  display: inline-flex;
+  gap: 1px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.bst-wait-dots b {
+  display: inline-block;
+  width: 0.45em;
+  text-align: center;
+  font-weight: 700;
+  animation: bst-wait-dot 0.95s ease-in-out infinite;
+}
+.bst-wait-dots b:nth-child(2) { animation-delay: 0.12s; }
+.bst-wait-dots b:nth-child(3) { animation-delay: 0.24s; }
+</style>
+""",
+        unsafe_allow_html=True,
+    )
+    st.session_state._bst_chat_wait_css = True
+
+
+_ASSISTANT_WAITING_HTML = """<div class="bst-wait-wrap">
+<div class="bst-wait-line">
+<span class="bst-wait-label">Generating a reply</span>
+<span class="bst-wait-dots"><b>·</b><b>·</b><b>·</b></span>
+</div>
+</div>"""
+
+
 def _welcome_stream() -> Iterator[str]:
-    """Markdown H1 + 한 글자씩 (st.write_stream용)."""
+    """Markdown H1, one character at a time for st.write_stream."""
     yield "# "
     for ch in WELCOME_HEADING:
         yield ch
@@ -55,7 +115,7 @@ def _welcome_stream() -> Iterator[str]:
 
 
 def _fill_welcome_heading_slot(welcome_slot: Any) -> None:
-    """맨 위 슬롯에만 타이핑(나머지 UI는 이미 실행된 뒤 호출)."""
+    """Type into the top placeholder only; call after the rest of the layout is built."""
     with welcome_slot:
         if st.session_state._welcome_typed:
             st.markdown(f"# {WELCOME_HEADING}\n")
@@ -78,7 +138,7 @@ _FAVICON = Path(__file__).resolve().parent / "static" / "favicon.png"
 
 
 def main() -> None:
-    page_icon: str = str(_FAVICON) if _FAVICON.is_file() else "🦫"
+    page_icon: str = str(_FAVICON) if _FAVICON.is_file() else "🦦"
     st.set_page_config(
         page_title="Basic Software Technology",
         page_icon=page_icon,
@@ -89,8 +149,8 @@ def main() -> None:
     welcome_slot = st.empty()
 
     st.caption(
-        "가상환경에서 `pip install -e .` 후 `excel-ai-chat`(기본 포트 8502) 또는 "
-        "프로젝트 루트에서 `python -m streamlit run excel_ai_chat/app.py`(.streamlit/config.toml)"
+        "Use a venv, then `pip install -e .` and run `excel-ai-chat` (default port **8502**), or from the repo root: "
+        "`python -m streamlit run excel_ai_chat/app.py` (see `.streamlit/config.toml`)."
     )
 
     up = uploads_dir()
@@ -100,57 +160,63 @@ def main() -> None:
         st.header("Ollama")
         st.session_state.ollama_base = st.text_input("Base URL", value=st.session_state.ollama_base)
         model_default = st.session_state.get("model_name", "llama3.2")
-        model = st.text_input("모델 이름", value=model_default)
+        model = st.text_input("Model name", value=model_default)
         st.session_state.model_name = model
         temperature = st.slider("temperature", 0.0, 1.5, 0.7, 0.05)
         st.caption(
-            "기본 API 주소는 `http://127.0.0.1:11434` 입니다. "
-            "WinError 10061이면 Ollama가 꺼져 있거나 URL/방화벽 문제일 수 있습니다."
+            "Default API base is `http://127.0.0.1:11434`. "
+            "WinError 10061 usually means Ollama is not running, the URL is wrong, or a firewall is blocking the port."
         )
-        if st.button("연결 테스트", help="GET /api/tags 로 Ollama 응답 확인"):
+        if st.button("Test connection", help="GET /api/tags — verify Ollama responds"):
             try:
                 list_models(st.session_state.ollama_base)
-                st.success("Ollama에 연결되었습니다.")
+                st.success("Connected to Ollama.")
             except Exception as e:  # noqa: BLE001
                 st.error(str(e))
-        if st.button("모델 목록 새로고침"):
+        if st.button("Refresh model list"):
             try:
                 models = list_models(st.session_state.ollama_base)
                 st.session_state["ollama_models"] = models
             except Exception as e:  # noqa: BLE001
                 st.error(str(e))
         if "ollama_models" in st.session_state and st.session_state.ollama_models:
-            st.selectbox("설치된 모델 (참고)", options=st.session_state.ollama_models, key="_model_pick")
+            st.selectbox("Installed models (reference)", options=st.session_state.ollama_models, key="_model_pick")
 
         st.divider()
-        st.caption("탭 아이콘 출처")
+        st.caption("Favicon attribution")
         st.markdown(
-            f'<p style="font-size:0.8rem;margin:0;">{FLATICON_WHALE_ATTR_HTML}</p>',
+            f'<p style="font-size:0.8rem;margin:0;">{FLATICON_OTTER_ATTR_HTML}</p>',
             unsafe_allow_html=True,
         )
 
-    tab_chat, tab_files, tab_merge = st.tabs(["대화", "파일", "엑셀 통합"])
+    tab_chat, tab_files, tab_merge = st.tabs(["Chat", "Files", "Merge sheets"])
 
     with tab_chat:
+        _inject_chat_wait_styles()
         for m in st.session_state.messages:
             with st.chat_message(m["role"]):
                 st.markdown(m["content"])
 
-        prompt = st.chat_input("메시지를 입력하세요…")
+        prompt = st.chat_input("Type a message…")
         if prompt:
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
             with st.chat_message("assistant"):
+                wait_slot = st.empty()
+                wait_slot.markdown(_ASSISTANT_WAITING_HTML, unsafe_allow_html=True)
                 try:
-                    reply = chat(
-                        st.session_state.ollama_base,
-                        model,
-                        st.session_state.messages,
-                        temperature=temperature,
-                    )
+                    with st.spinner("Waiting for the model…"):
+                        reply = chat(
+                            st.session_state.ollama_base,
+                            model,
+                            st.session_state.messages,
+                            temperature=temperature,
+                        )
                 except Exception as e:  # noqa: BLE001
-                    reply = f"**오류**\n\n{e}"
+                    reply = f"**Error**\n\n{e}"
+                finally:
+                    wait_slot.empty()
                 st.markdown(reply)
             st.session_state.messages.append({"role": "assistant", "content": reply})
 
@@ -159,25 +225,25 @@ def main() -> None:
         c1, c2, c3 = st.columns(3)
         with c1:
             st.download_button(
-                "대화 내용 .md 다운로드",
+                "Download chat as .md",
                 data=md.encode("utf-8"),
                 file_name="chat.md",
                 mime="text/markdown",
                 disabled=not st.session_state.messages,
             )
         with c2:
-            if st.button("outputs에 대화 저장", disabled=not st.session_state.messages):
+            if st.button("Save chat to outputs", disabled=not st.session_state.messages):
                 ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
                 p = out / f"chat_{ts}.md"
                 p.write_text(md, encoding="utf-8")
-                st.success(f"저장됨: {p}")
+                st.success(f"Saved: {p}")
         with c3:
-            if st.button("대화 초기화"):
+            if st.button("Clear chat"):
                 st.session_state.messages = []
                 st.rerun()
 
     with tab_files:
-        st.subheader("업로드")
+        st.subheader("Upload")
         files = st.file_uploader(
             "CSV / Excel",
             type=["csv", "xlsx", "xlsm", "xls"],
@@ -192,19 +258,19 @@ def main() -> None:
                     continue
                 dest = up / name
                 dest.write_bytes(f.getvalue())
-                st.success(f"저장: {dest.name}")
+                st.success(f"Saved: {dest.name}")
 
-        st.subheader("업로드된 파일")
+        st.subheader("Uploaded files")
         paths = sorted(up.iterdir(), key=lambda p: p.name.lower())
         if not paths:
-            st.info("uploads 폴더가 비어 있습니다.")
+            st.info("The uploads folder is empty.")
         for p in paths:
             cols = st.columns([4, 1, 1])
             cols[0].write(p.name)
-            if cols[1].button("삭제", key=f"del_{p.name}"):
+            if cols[1].button("Delete", key=f"del_{p.name}"):
                 p.unlink(missing_ok=True)
                 st.rerun()
-            if p.suffix.lower() in {".xlsx", ".xlsm", ".xls", ".csv"} and cols[2].button("미리보기", key=f"pv_{p.name}"):
+            if p.suffix.lower() in {".xlsx", ".xlsm", ".xls", ".csv"} and cols[2].button("Preview", key=f"pv_{p.name}"):
                 try:
                     head = read_table(p).head(10)
                     st.dataframe(head, use_container_width=True)
@@ -213,14 +279,15 @@ def main() -> None:
 
     with tab_merge:
         st.markdown(
-            "여러 파일을 합친 뒤, **키 열**이 같은 행끼리 묶어 숫자 열은 **평균**, 그 외는 **첫 값**으로 합니다."
+            "Merge multiple files: rows with the same **key columns** are grouped; **numeric** columns use the "
+            "**mean**, other columns use the **first** value."
         )
         all_files = sorted([p for p in up.iterdir() if p.is_file()], key=lambda p: p.name.lower())
         if len(all_files) < 2:
-            st.warning("통합하려면 uploads에 파일을 2개 이상 올리세요.")
+            st.warning("Upload at least two files into `uploads/` to merge.")
         else:
-            chosen = st.multiselect("통합할 파일", options=[p.name for p in all_files], default=[p.name for p in all_files[:5]])
-            sheet = st.text_input("시트 이름 또는 인덱스 (0=첫 시트)", value="0")
+            chosen = st.multiselect("Files to merge", options=[p.name for p in all_files], default=[p.name for p in all_files[:5]])
+            sheet = st.text_input("Sheet name or index (0 = first sheet)", value="0")
             sheet_val: str | int
             if re.fullmatch(r"\d+", sheet.strip()):
                 sheet_val = int(sheet.strip())
@@ -233,16 +300,16 @@ def main() -> None:
             try:
                 cols_preview = list(read_table(ref_path, sheet_name=sheet_val).columns.astype(str))
             except Exception as e:  # noqa: BLE001
-                st.error(f"열 목록을 읽지 못했습니다: {e}")
+                st.error(f"Could not read column list: {e}")
 
-            keys = st.multiselect("키 열", options=cols_preview, default=cols_preview[:1] if cols_preview else [])
-            out_name = st.text_input("결과 파일 이름", value="merged.xlsx")
+            keys = st.multiselect("Key columns", options=cols_preview, default=cols_preview[:1] if cols_preview else [])
+            out_name = st.text_input("Output file name", value="merged.xlsx")
 
-            if st.button("통합 실행"):
+            if st.button("Run merge"):
                 if len(chosen) < 2:
-                    st.error("파일을 2개 이상 선택하세요.")
+                    st.error("Select at least two files.")
                 elif not keys:
-                    st.error("키 열을 하나 이상 선택하세요.")
+                    st.error("Select at least one key column.")
                 else:
                     try:
                         paths_sel = [up / n for n in chosen]
@@ -253,10 +320,10 @@ def main() -> None:
                             p_out = Path(p_out.stem + ".xlsx")
                         dest = out / _safe_name(p_out.name)
                         merged.to_excel(dest, index=False, engine="openpyxl")
-                        st.success(f"저장: {dest}")
+                        st.success(f"Saved: {dest}")
                         st.dataframe(merged.head(50), use_container_width=True)
                         st.download_button(
-                            "결과 다운로드",
+                            "Download result",
                             data=dest.read_bytes(),
                             file_name=dest.name,
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -266,15 +333,15 @@ def main() -> None:
                         st.error(str(e))
 
         st.divider()
-        st.subheader("outputs 정리")
+        st.subheader("Clear outputs")
         outs = sorted(out.iterdir(), key=lambda p: p.name.lower())
-        if st.button("outputs 폴더 비우기"):
+        if st.button("Empty outputs folder"):
             for p in outs:
                 if p.is_file():
                     p.unlink()
                 elif p.is_dir():
                     shutil.rmtree(p, ignore_errors=True)
-            st.success("outputs 비움")
+            st.success("Outputs folder cleared.")
             st.rerun()
         for p in outs:
             st.write(p.name)

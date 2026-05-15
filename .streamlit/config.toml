@@ -1,3 +1,3 @@
-# 기본 포트 (8501 충돌 시 여기 또는 STREAMLIT_SERVER_PORT로 변경)
+# Default port (change here or via STREAMLIT_SERVER_PORT if 8501 is taken)
 [server]
 port = 8502

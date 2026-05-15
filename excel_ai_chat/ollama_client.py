@@ -20,15 +20,15 @@ def explain_connection_error(base_url: str, exc: BaseException) -> str:
     if not refused:
         return str(exc)
     return (
-        f"Ollama에 연결하지 못했습니다: `{base_url}`\n\n"
-        "**가능한 원인**\n"
-        "- 이 PC에서 **Ollama가 실행 중이 아님** (기본 주소 `http://127.0.0.1:11434`).\n"
-        "- Base URL이 잘못됨 (다른 머신이면 `http://IP주소:11434` 등).\n"
-        "- 방화벽이 **11434** 포트를 차단함.\n\n"
-        "**조치**\n"
-        "1. [Ollama](https://ollama.com) 설치 후 앱을 실행하거나, 터미널에서 `ollama serve`가 떠 있는지 확인합니다.\n"
-        "2. `ollama pull <모델명>` 으로 모델을 받은 뒤, 사이드바의 모델 이름과 맞춥니다.\n"
-        "3. 원격 GPU 서버를 쓰는 경우 그 서버의 Ollama 주소로 Base URL을 바꿉니다."
+        f"Could not connect to Ollama at `{base_url}`.\n\n"
+        "**Likely causes**\n"
+        "- **Ollama is not running** on this machine (default `http://127.0.0.1:11434`).\n"
+        "- **Wrong Base URL** (for a remote host use `http://<host-ip>:11434`, etc.).\n"
+        "- **Firewall** blocking port **11434**.\n\n"
+        "**What to do**\n"
+        "1. Install [Ollama](https://ollama.com), start the app, or ensure `ollama serve` is running.\n"
+        "2. Run `ollama pull <model>` and match the **Model name** in the sidebar.\n"
+        "3. If Ollama runs on another machine/GPU server, set Base URL to that server’s address."
     )
 
 
