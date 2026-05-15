@@ -1,3 +1,10 @@
 # Default port (change here or via STREAMLIT_SERVER_PORT if 8501 is taken)
 [server]
 port = 8502
+
+[theme]
+primaryColor = "#0d9488"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f8fafc"
+textColor = "#0f172a"
+font = "sans serif"

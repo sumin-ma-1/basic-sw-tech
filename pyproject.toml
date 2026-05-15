@@ -31,7 +31,7 @@ where = ["."]
 include = ["excel_ai_chat*"]
 
 [tool.setuptools.package-data]
-excel_ai_chat = ["static/*.png"]
+excel_ai_chat = ["static/**/*.css", "static/**/*.png"]
 
 [tool.ruff]
 line-length = 100

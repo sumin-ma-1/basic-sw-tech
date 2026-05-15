@@ -59,6 +59,8 @@ Open `http://localhost:8502` (or the port you set) in your browser.
 
 ## Features
 
+The app opens on a **hub**: choose **Excel World** for chat, file uploads, and merge. Use **Home** to return; new capabilities can add more tiles on the hub.
+
 | Area | Description |
 |------|-------------|
 | **Chat** | Multi-turn chat via Ollama `api/chat`, temperature, download chat as `.md` or save under `outputs/` |
@@ -69,12 +71,12 @@ Open `http://localhost:8502` (or the port you set) in your browser.
 
 | Path | Description |
 |------|-------------|
-| `excel_ai_chat/` | Package source (`app.py`, Ollama client, Excel helpers) |
+| `excel_ai_chat/` | Package source (`app.py`, Ollama client, Excel helpers, `theme.py`) |
+| `excel_ai_chat/static/css/` | Hub UI styles (`hub_theme.css`, `waiting.css`), loaded by `theme.py` |
 | `uploads/` | Uploaded files (gitignored) |
 | `outputs/` | Merged files and saved chats (gitignored) |
 | `.streamlit/config.toml` | Streamlit server port, etc. |
 | `.venv/` | Virtual environment (gitignored) |
-
 
 ## Development
 
