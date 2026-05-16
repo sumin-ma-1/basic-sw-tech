@@ -1,4 +1,4 @@
-/* Assistant “typing” indicator */
+/* Assistant “typing” indicator — rotating phrases + bouncing dots */
 
 @keyframes bst-pulse {
   0%,
@@ -23,28 +23,96 @@
   }
 }
 
+@keyframes bst-wait-phrase {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  2% {
+    opacity: 1;
+    visibility: visible;
+  }
+  18% {
+    opacity: 1;
+    visibility: visible;
+  }
+  20% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 .bst-wait-wrap {
   font-size: 0.92rem;
   color: var(--bst-muted, #64748b);
-  margin: 0.1rem 0 0.45rem;
+  margin: 0;
+  padding: 0;
+  width: max-content;
+  min-width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
+/* Sizer (longest phrase) + animated phrases share one grid cell for stable width */
 .bst-wait-line {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
+  display: inline-grid;
+  grid-template-columns: max-content;
+  grid-template-rows: auto;
+  width: max-content;
+  min-width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.bst-wait-label {
-  animation: bst-pulse 1.25s ease-in-out infinite;
+.bst-wait-sizer {
+  grid-column: 1;
+  grid-row: 1;
+  visibility: hidden;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.38em;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.bst-wait-phrases {
+  grid-column: 1;
+  grid-row: 1;
+  display: inline-grid;
+  grid-template: 1fr / 1fr;
+  align-items: center;
+  width: max-content;
+  min-width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.bst-wait-phrase {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.38em;
+  white-space: nowrap;
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  animation: bst-wait-phrase var(--bst-wait-cycle, 16s) ease-in-out infinite;
 }
 
 .bst-wait-dots {
   display: inline-flex;
+  flex-shrink: 0;
   gap: 1px;
   font-weight: 700;
   letter-spacing: 0.02em;
+  animation: bst-pulse 1.25s ease-in-out infinite;
 }
 
 .bst-wait-dots b {

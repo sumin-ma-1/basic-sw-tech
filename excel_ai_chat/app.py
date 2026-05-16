@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 import re
 import shutil
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +28,54 @@ MODE_EXCEL = "excel"
 
 CHAT_COMPOSER_KEY = "hub_composer"
 
+BST_INSTALLED_MODEL_PICK_KEY = "bst_installed_model_pick"
+
+# Drain chat_input into messages before the thread renders (avoids default Streamlit chat
+# chrome before messages are inside the themed thread; hub bubble CSS keys off #bst-hub-chat-styling-root).
+_BST_PENDING_CHAT_GEN = "_bst_pending_chat_gen"
+_BST_PENDING_EXCEL_GEN = "_bst_pending_excel_gen"
+
+# Not in Streamlit PresetNames → avatar=None yields no icon (see chat._process_avatar_input).
+_HUB_CHAT_USER_DISPLAY_NAME = "You"
+
+
+@contextmanager
+def _hub_chat_message(role: str):
+    """Hub chat bubbles + hidden role marker for CSS (left = assistant, right = user)."""
+    # Avoid BEM-style "--" in class names: some HTML sanitizers strip them, breaking :has(...) selectors.
+    marker = "bst-msg-marker-user" if role == "user" else "bst-msg-marker-assistant"
+    fav = Path(__file__).resolve().parent / "static" / "favicon.png"
+    fav_path = fav.resolve().as_posix() if fav.is_file() else None
+
+    if role == "user":
+        with st.chat_message(_HUB_CHAT_USER_DISPLAY_NAME, avatar=None, width="stretch"):
+            st.markdown(
+                f'<span class="bst-msg-marker {marker}" hidden aria-hidden="true"></span>',
+                unsafe_allow_html=True,
+            )
+            yield
+    else:
+        avatar = fav_path if fav_path else ":material/auto_awesome:"
+        with st.chat_message("assistant", avatar=avatar, width="stretch"):
+            st.markdown(
+                f'<span class="bst-msg-marker {marker}" hidden aria-hidden="true"></span>',
+                unsafe_allow_html=True,
+            )
+            yield
+
+
+def _hub_message_body_markdown(text: str, *, role: str) -> None:
+    """Hub thread message body: layout width must match role.
+
+    ``stretch`` fills the chat column; on the user row that column is often narrow in
+    flex layout, so short lines wrap. ``content`` keeps intrinsic width; CSS caps max.
+    """
+    if role == "user":
+        st.markdown(text, width="content")
+    else:
+        st.markdown(text, width="stretch")
+
+
 WELCOME_HEADING = "Welcome to our basic software technology"
 CHAT_TAGLINES: tuple[str, ...] = (
     "How can I help you today?",
@@ -41,10 +90,41 @@ FLATICON_OTTER_ATTR_HTML = (
 
 _FAVICON = Path(__file__).resolve().parent / "static" / "favicon.png"
 
-_WAITING_HTML = """<div class="bst-wait-wrap"><div class="bst-wait-line">
-<span class="bst-wait-label">Generating a reply</span>
-<span class="bst-wait-dots"><b>·</b><b>·</b><b>·</b></span>
-</div></div>"""
+_WAITING_PHRASE_STEP_SEC = 3.2
+_WAITING_DOTS_HTML = '<span class="bst-wait-dots"><b>·</b><b>·</b><b>·</b></span>'
+# (label, animation-delay seconds) — Swimming first
+_WAITING_PHRASES: tuple[tuple[str, float], ...] = (
+    ("Floating while I think", 0.0),
+    ("Cracking open a fresh answer", -3.2),
+    ("Gathering shiny little thoughts", -6.4),
+    ("Splishing up a clever answer", -9.6),
+    ("Hold on, the otter is consulting its pebble", -12.8),
+)
+
+
+def _waiting_html() -> str:
+    """Rotating status; hidden sizer keeps the bubble wide enough for the longest phrase + dots."""
+    n = len(_WAITING_PHRASES)
+    cycle = n * _WAITING_PHRASE_STEP_SEC
+    longest = max(_WAITING_PHRASES, key=lambda item: len(item[0]))[0]
+    sizer = (
+        f'<span class="bst-wait-sizer" aria-hidden="true">'
+        f"{html.escape(longest)}{_WAITING_DOTS_HTML}</span>"
+    )
+    phrases = "".join(
+        f'<span class="bst-wait-phrase" style="animation-delay:{delay}s">'
+        f"{html.escape(label)}{_WAITING_DOTS_HTML}</span>"
+        for label, delay in _WAITING_PHRASES
+    )
+    parts = [
+        f'<div class="bst-wait-wrap" style="--bst-wait-cycle:{cycle}s">',
+        f'<div class="bst-wait-line">{sizer}',
+        f'<span class="bst-wait-phrases" aria-live="polite">{phrases}</span>',
+        "</div></div>",
+    ]
+    return "".join(parts)
+
+
 
 _SUGGEST_CHIPS: list[tuple[str, str]] = [
     ("Average & sum",    "Calculate the mean and sum of every numeric column."),
@@ -135,9 +215,96 @@ def _fm_library_delete_styles() -> None:
     )
 
 
+_HUB_EXCEL_CHIP_CSS = (
+    '.stApp [class*="st-key-hub_enter_excel"] .stButton>button,'
+    '.stApp [class*="st-key-hub_enter_excel"] [data-testid="baseButton-secondary"],'
+    '.stApp [class*="st-key-hub_exit_excel"] .stButton>button,'
+    '.stApp [class*="st-key-hub_exit_excel"] [data-testid="baseButton-secondary"]{'
+    "background:linear-gradient(180deg,#f0fdfa 0%,#ccfbf1 100%)!important;"
+    "background-color:#ccfbf1!important;"
+    "border:1px solid #5eead4!important;"
+    "color:#0f766e!important;"
+    "font-weight:600!important;"
+    "border-radius:999px!important;"
+    "box-shadow:0 1px 0 rgba(255,255,255,.65) inset,0 1px 3px rgba(13,148,136,.14)!important;"
+    "}"
+    '.stApp [class*="st-key-hub_exit_excel"] .stButton>button,'
+    '.stApp [class*="st-key-hub_exit_excel"] [data-testid="baseButton-secondary"]{'
+    "width:2.4rem!important;height:2.4rem!important;min-height:2.4rem!important;"
+    "padding:0!important;display:flex!important;align-items:center!important;"
+    "justify-content:center!important;font-size:1.15rem!important;line-height:1!important;"
+    "}"
+    '.stApp [class*="st-key-hub_enter_excel"] .stButton>button p,'
+    '.stApp [class*="st-key-hub_enter_excel"] .stButton>button span,'
+    '.stApp [class*="st-key-hub_exit_excel"] .stButton>button p,'
+    '.stApp [class*="st-key-hub_exit_excel"] .stButton>button span{color:inherit!important;}'
+)
+
+
+def _hub_excel_chip_styles() -> None:
+    """Teal Excel chips + × exit — CSS + JS paint (Streamlit often ignores chip CSS on ×)."""
+    st.html(f"<style>{_HUB_EXCEL_CHIP_CSS}</style>")
+    css_js = _HUB_EXCEL_CHIP_CSS.replace("\\", "\\\\").replace("'", "\\'")
+    components.html(
+        "<script>(function(){"
+        "const d=window.parent.document;"
+        "const sid='bst-hub-excel-chip-style';"
+        "if(!d.getElementById(sid)){const el=d.createElement('style');el.id=sid;"
+        "el.textContent='" + css_js + "';d.head.appendChild(el);}"
+        "const dark=()=>d.documentElement.getAttribute('data-theme')==='dark';"
+        "const pal=()=>dark()?{"
+        "bg:'rgba(13,148,136,0.14)',bd:'rgba(45,212,191,0.48)',fg:'#5eead4',"
+        "hbg:'rgba(45,212,191,0.26)',hbd:'#2dd4bf',hfg:'#ccfbf1',sh:'0 1px 4px rgba(13,148,136,.28)'"
+        "}:{"
+        "bg:'#ccfbf1',bd:'#5eead4',fg:'#0f766e',"
+        "hbg:'#99f6e4',hbd:'#2dd4bf',hfg:'#115e59',sh:'0 1px 3px rgba(13,148,136,.14)'};"
+        "const s=(b,k,v)=>b&&b.style.setProperty(k,v,'important');"
+        "const paint=(btn,isExit)=>{if(!btn)return;const c=pal();const dk=dark();"
+        "s(btn,'background',dk?"
+        "'linear-gradient(180deg,rgba(45,212,191,.16) 0%,'+c.bg+' 100%)':"
+        "'linear-gradient(180deg,#f0fdfa 0%,#ccfbf1 100%)');"
+        "s(btn,'background-color',c.bg);s(btn,'border','1px solid '+c.bd);"
+        "s(btn,'color',c.fg);s(btn,'font-weight','600');s(btn,'border-radius','999px');"
+        "s(btn,'box-shadow','0 1px 0 rgba(255,255,255,.55) inset, '+c.sh);"
+        "s(btn,'filter','none');"
+        "s(btn,'transform',isExit?'none':'translateY(0)');"
+        "if(isExit){s(btn,'width','2.4rem');s(btn,'height','2.4rem');s(btn,'min-height','2.4rem');"
+        "s(btn,'padding','0');s(btn,'display','flex');s(btn,'align-items','center');"
+        "s(btn,'justify-content','center');s(btn,'font-size','1.15rem');s(btn,'line-height','1');}"
+        "btn.querySelectorAll('p,span').forEach((n)=>s(n,'color','inherit'));"
+        "if(!btn.dataset.bstExcelFx){btn.dataset.bstExcelFx='1';"
+        "btn.addEventListener('mouseenter',()=>{const h=pal();"
+        "s(btn,'background-color',h.hbg);s(btn,'border-color',h.hbd);s(btn,'color',h.hfg);"
+        "if(!isExit){s(btn,'transform','translateY(-2px)');"
+        "s(btn,'box-shadow','0 1px 0 rgba(255,255,255,.45) inset, 0 2px 8px rgba(13,148,136,.22), 0 4px 14px rgba(13,148,136,.24)');}});"
+        "btn.addEventListener('mouseleave',()=>paint(btn,isExit));}};"
+        "const after=(id)=>{const a=d.getElementById(id);if(!a)return null;"
+        "let n=a.nextElementSibling;for(let i=0;i<6&&n;i++){"
+        "const b=n.querySelector&&n.querySelector('button');if(b)return b;n=n.nextElementSibling;}"
+        "return null;};"
+        "const run=()=>{"
+        "d.querySelectorAll('[class*=\"st-key-hub_enter_excel\"]').forEach((w)=>{"
+        "paint(w.matches('button')?w:w.querySelector('button'),false);});"
+        "d.querySelectorAll('[class*=\"st-key-hub_exit_excel\"]').forEach((w)=>{"
+        "paint(w.matches('button')?w:w.querySelector('button'),true);});"
+        "paint(after('bst-mode-toggle-chat'),false);"
+        "paint(after('bst-mode-toggle-excel'),true);};"
+        "run();new MutationObserver(run).observe(d.body,{childList:true,subtree:true});"
+        "setTimeout(run,30);setTimeout(run,200);setTimeout(run,700);"
+        "})();</script>",
+        height=0,
+        scrolling=False,
+    )
+
+
 def _purge_hub_widget_keys() -> None:
     """Remove hub input / uploader widget state so the next paint matches a fresh load."""
-    drop = {CHAT_COMPOSER_KEY, "excel_ai_uploader"}
+    drop = {
+        CHAT_COMPOSER_KEY,
+        "excel_ai_uploader",
+        _BST_PENDING_CHAT_GEN,
+        _BST_PENDING_EXCEL_GEN,
+    }
     for key in list(st.session_state.keys()):
         if not isinstance(key, str):
             continue
@@ -148,8 +315,8 @@ def _purge_hub_widget_keys() -> None:
 def _restore_main_hub() -> None:
     """Excel exit → identical to first-load main hub (chat home)."""
     st.session_state.hub_mode = MODE_CHAT
-    st.session_state.excel_ai_df = None
-    st.session_state.excel_ai_file_name = ""
+    st.session_state.excel_ai_files = {}
+    st.session_state.excel_ai_upload_sig = None
     st.session_state.excel_ai_messages = []
     st.session_state.excel_ai_chip_text = ""
     st.session_state.excel_ai_input_counter = 0
@@ -169,36 +336,148 @@ def _init_state() -> None:
         "nav_page":               NAV_HUB,
         "hub_mode":               MODE_CHAT,
         "chat_input_counter":     0,
-        "excel_ai_df":            None,
-        "excel_ai_file_name":     "",
+        "excel_ai_files":         {},
+        "excel_ai_upload_sig":    None,
         "excel_ai_messages":      [],
         "excel_ai_input_counter": 0,
         "excel_ai_chip_text":     "",
+        "model_name":             "llama3.2",
     }
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
 
 
+def _on_installed_model_pick_change() -> None:
+    """Copy Installed models selectbox → Model text field."""
+    st.session_state.model_name = st.session_state[BST_INSTALLED_MODEL_PICK_KEY]
+
+
 # ── Excel helpers ─────────────────────────────────────────────────────────────
 
-def _process_upload(uploaded: Any) -> None:
-    if uploaded is None or st.session_state.excel_ai_file_name == uploaded.name:
+def _excel_files() -> dict[str, pd.DataFrame]:
+    """Uploaded spreadsheets in Excel mode (filename → DataFrame)."""
+    files = st.session_state.get("excel_ai_files")
+    if not isinstance(files, dict):
+        files = {}
+        st.session_state.excel_ai_files = files
+    return files
+
+
+def _read_uploaded_dataframe(uploaded: Any) -> pd.DataFrame:
+    suffix = Path(uploaded.name).suffix.lower()
+    if suffix == ".csv":
+        return pd.read_csv(uploaded)
+    if suffix in {".xlsx", ".xlsm"}:
+        return pd.read_excel(uploaded, engine="openpyxl")
+    return pd.read_excel(uploaded)
+
+
+def _excel_upload_signature(uploaded_list: list[Any]) -> tuple[tuple[str, int], ...]:
+    return tuple((f.name, f.size) for f in sorted(uploaded_list, key=lambda u: u.name))
+
+
+def _process_uploads(uploaded: Any) -> None:
+    """Sync session files with the multi-file uploader widget."""
+    if uploaded is None:
         return
-    try:
-        suffix = Path(uploaded.name).suffix.lower()
-        if suffix == ".csv":
-            df = pd.read_csv(uploaded)
-        elif suffix in {".xlsx", ".xlsm"}:
-            df = pd.read_excel(uploaded, engine="openpyxl")
-        else:
-            df = pd.read_excel(uploaded)
-        st.session_state.excel_ai_df = df
-        st.session_state.excel_ai_file_name = uploaded.name
+    uploaded_list = uploaded if isinstance(uploaded, list) else [uploaded]
+    sig = _excel_upload_signature(uploaded_list)
+    if sig == st.session_state.get("excel_ai_upload_sig"):
+        return
+
+    prev_names = set(_excel_files())
+    files: dict[str, pd.DataFrame] = {}
+    errors: list[str] = []
+
+    for item in uploaded_list:
+        try:
+            name = _safe_name(item.name)
+        except ValueError as e:
+            errors.append(f"{item.name}: {e}")
+            continue
+        try:
+            item.seek(0)
+            files[name] = _read_uploaded_dataframe(item)
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"{name}: {e}")
+
+    for msg in errors:
+        st.error(f"Could not read file: {msg}")
+
+    st.session_state.excel_ai_files = files
+    st.session_state.excel_ai_upload_sig = sig
+    if set(files) != prev_names:
         st.session_state.excel_ai_messages = []
         st.session_state.excel_ai_input_counter += 1
-    except Exception as e:  # noqa: BLE001
-        st.error(f"Could not read file: {e}")
+
+
+def _excel_files_badge_html(files: dict[str, pd.DataFrame]) -> str:
+    if not files:
+        return (
+            "<p style='text-align:center;color:#9ca3af;font-size:.88rem;"
+            "margin:.2rem 0 .65rem;'>Upload one or more spreadsheets to get started</p>"
+        )
+    rows = []
+    for name in sorted(files):
+        df = files[name]
+        rows.append(
+            f"<span>{html.escape(name)}</span>"
+            f" &nbsp;·&nbsp; {len(df):,} rows &times; {len(df.columns)} cols"
+        )
+    body = "<br>".join(rows)
+    label = "file" if len(files) == 1 else "files"
+    return (
+        f"<p style='text-align:center;color:#6b7280;font-size:.88rem;margin:.2rem 0 .5rem;'>"
+        f"<strong>{len(files)}</strong> {label}<br>{body}</p>"
+    )
+
+
+def _build_excel_data_context(files: dict[str, pd.DataFrame], prompt: str) -> str:
+    parts: list[str] = []
+    for name in sorted(files):
+        df = files[name]
+        csv_str = df.head(50).to_csv(index=False)
+        parts.append(
+            f"### {name}\n"
+            f"({len(df):,} rows × {len(df.columns)} columns, CSV sample, first 50 rows):\n\n"
+            f"```\n{csv_str}```"
+        )
+    file_word = "file" if len(files) == 1 else "files"
+    return (
+        f"Here is the data from {len(files)} uploaded spreadsheet {file_word}:\n\n"
+        + "\n\n".join(parts)
+        + f"\n\nUsing the data above, please handle this request:\n\n{prompt}"
+    )
+
+
+_PREVIEW_SCROLL_HEIGHT_PX = 440
+_PREVIEW_MAX_DISPLAY_ROWS = 5000
+_PREVIEW_COL_WIDTH_PX = 150
+
+
+def _preview_column_config(df: pd.DataFrame) -> dict[str, st.column_config.Column]:
+    """Keep columns wide enough that the grid scrolls horizontally when needed."""
+    return {
+        str(col): st.column_config.Column(width=_PREVIEW_COL_WIDTH_PX) for col in df.columns
+    }
+
+
+def _render_scrollable_dataframe(df: pd.DataFrame) -> None:
+    """Full preview in a fixed-height table — scroll inside to see all rows/columns."""
+    total = len(df)
+    view = df.head(_PREVIEW_MAX_DISPLAY_ROWS) if total > _PREVIEW_MAX_DISPLAY_ROWS else df
+    st.dataframe(
+        view,
+        width="stretch",
+        height=_PREVIEW_SCROLL_HEIGHT_PX,
+        column_config=_preview_column_config(view),
+    )
+    if total > _PREVIEW_MAX_DISPLAY_ROWS:
+        st.caption(
+            f"Showing the first {_PREVIEW_MAX_DISPLAY_ROWS:,} of {total:,} rows. "
+            "Scroll inside the table (vertical and horizontal) for the rest of this preview."
+        )
 
 
 def _render_suggest_chips() -> None:
@@ -214,27 +493,19 @@ def _render_suggest_chips() -> None:
 
 def _render_excel_context_empty() -> None:
     """File uploader + file badge + chips — shown in empty state."""
-    df: pd.DataFrame | None = st.session_state.excel_ai_df
-
-    badge = (
-        f"<p style='text-align:center;color:#6b7280;font-size:.88rem;"
-        f"margin:.2rem 0 .5rem;'>{st.session_state.excel_ai_file_name}"
-        f" &nbsp;·&nbsp; {len(df):,} rows &times; {len(df.columns)} cols</p>"
-        if df is not None
-        else "<p style='text-align:center;color:#9ca3af;font-size:.88rem;"
-             "margin:.2rem 0 .65rem;'>Upload a spreadsheet to get started</p>"
-    )
-    st.markdown(badge, unsafe_allow_html=True)
+    files = _excel_files()
+    st.markdown(_excel_files_badge_html(files), unsafe_allow_html=True)
 
     uploaded = st.file_uploader(
         "CSV / Excel",
         type=["csv", "xlsx", "xlsm", "xls"],
+        accept_multiple_files=True,
         key="excel_ai_uploader",
         label_visibility="collapsed",
     )
-    _process_upload(uploaded)
+    _process_uploads(uploaded)
 
-    if df is not None:
+    if _excel_files():
         _render_suggest_chips()
 
     st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
@@ -242,32 +513,57 @@ def _render_excel_context_empty() -> None:
 
 def _render_excel_context_compact() -> None:
     """Minimal file info + optional preview — shown above messages."""
-    df: pd.DataFrame | None = st.session_state.excel_ai_df
     uploaded = st.file_uploader(
-        "Replace file",
+        "Add or replace files",
         type=["csv", "xlsx", "xlsm", "xls"],
+        accept_multiple_files=True,
         key="excel_ai_uploader",
         label_visibility="collapsed",
     )
-    _process_upload(uploaded)
-    if df is not None:
-        st.caption(
-            f"**{st.session_state.excel_ai_file_name}**"
-            f" &nbsp;·&nbsp; {len(df):,} rows × {len(df.columns)} cols"
-        )
-        with st.expander("Data preview"):
-            st.dataframe(df.head(10), use_container_width=True)
+    _process_uploads(uploaded)
+    files = _excel_files()
+    if not files:
+        return
+    lines = [
+        f"**{name}** — {len(df):,} rows × {len(df.columns)} cols"
+        for name, df in sorted(files.items())
+    ]
+    st.caption(" · ".join(lines) if len(lines) <= 2 else "\n\n".join(lines))
+    with st.expander("Data preview"):
+        if len(files) == 1:
+            name = next(iter(files))
+            _render_scrollable_dataframe(files[name])
+        else:
+            for name, df in sorted(files.items()):
+                st.markdown(f"**{name}**")
+                _render_scrollable_dataframe(df)
 
 
 # ── Submission handlers ───────────────────────────────────────────────────────
 
-def _submit_chat(model: str, temperature: float, prompt: str) -> None:
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    with st.chat_message("assistant"):
+def _hub_drain_pending_chat_submit(model: str, temperature: float) -> None:
+    """If the hub chat_input has a value, record the user message and flag generation."""
+    if st.session_state.hub_mode != MODE_CHAT:
+        return
+    key = _composer_widget_key()
+    val = st.session_state.get(key)
+    if not isinstance(val, str) or not val.strip():
+        return
+    text = val.strip()
+    st.session_state.messages.append({"role": "user", "content": text})
+    st.session_state[_BST_PENDING_CHAT_GEN] = (model, temperature)
+    st.session_state.chat_input_counter += 1
+
+
+def _hub_complete_pending_chat_generation(model: str, temperature: float) -> None:
+    """Inside the hub thread: assistant bubble shows wait dots, then the reply."""
+    if _BST_PENDING_CHAT_GEN not in st.session_state:
+        return
+    st.session_state.pop(_BST_PENDING_CHAT_GEN, None)
+
+    with _hub_chat_message("assistant"):
         slot = st.empty()
-        slot.markdown(_WAITING_HTML, unsafe_allow_html=True)
+        slot.markdown(_waiting_html(), unsafe_allow_html=True, width="content")
         try:
             reply = chat(
                 st.session_state.ollama_base,
@@ -279,46 +575,63 @@ def _submit_chat(model: str, temperature: float, prompt: str) -> None:
             reply = f"**Error**\n\n{e}"
         finally:
             slot.empty()
-        st.markdown(reply)
+        _hub_message_body_markdown(reply, role="assistant")
+
     st.session_state.messages.append({"role": "assistant", "content": reply})
     st.rerun()
 
 
-def _submit_excel(model: str, temperature: float, df: pd.DataFrame, prompt: str) -> None:
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    if not st.session_state.excel_ai_messages:
-        csv_str = df.head(50).to_csv(index=False)
-        first = (
-            f"Here is the data from '{st.session_state.excel_ai_file_name}' "
-            f"({len(df):,} rows × {len(df.columns)} cols, CSV format):\n\n"
-            f"```\n{csv_str}```\n\n"
-            f"Using the data above, please handle this request:\n\n{prompt}"
-        )
-        st.session_state.excel_ai_messages.append(
-            {"role": "user", "content": first, "_hidden": True}
-        )
-    else:
-        st.session_state.excel_ai_messages.append({"role": "user", "content": prompt})
-
-    api_msgs = [
+def _excel_api_messages() -> list[dict[str, str]]:
+    return [
         {k: v for k, v in m.items() if k != "_hidden"}
         for m in st.session_state.excel_ai_messages
     ]
 
-    with st.chat_message("assistant"):
+
+def _excel_ensure_hidden_context(files: dict[str, pd.DataFrame]) -> None:
+    """First Excel turn: prepend spreadsheet sample for the model (not shown in thread)."""
+    if any(m.get("_hidden") for m in st.session_state.excel_ai_messages):
+        return
+    prompt = ""
+    for m in reversed(st.session_state.excel_ai_messages):
+        if m.get("role") == "user" and not m.get("_hidden"):
+            prompt = str(m.get("content", ""))
+            break
+    if not prompt:
+        return
+    st.session_state.excel_ai_messages.insert(
+        0,
+        {
+            "role": "user",
+            "content": _build_excel_data_context(files, prompt),
+            "_hidden": True,
+        },
+    )
+
+
+def _hub_complete_pending_excel_generation(model: str, temperature: float) -> None:
+    """Inside the hub thread: assistant bubble shows wait dots, then the reply."""
+    if _BST_PENDING_EXCEL_GEN not in st.session_state:
+        return
+    st.session_state.pop(_BST_PENDING_EXCEL_GEN, None)
+    files = _excel_files()
+    _excel_ensure_hidden_context(files)
+
+    with _hub_chat_message("assistant"):
         slot = st.empty()
-        slot.markdown(_WAITING_HTML, unsafe_allow_html=True)
+        slot.markdown(_waiting_html(), unsafe_allow_html=True, width="content")
         try:
             reply = chat(
-                st.session_state.ollama_base, model, api_msgs, temperature=temperature,
+                st.session_state.ollama_base,
+                model,
+                _excel_api_messages(),
+                temperature=temperature,
             )
         except Exception as e:  # noqa: BLE001
             reply = f"**Error**\n\n{e}"
         finally:
             slot.empty()
-        st.markdown(reply)
+        _hub_message_body_markdown(reply, role="assistant")
 
     st.session_state.excel_ai_messages.append({"role": "assistant", "content": reply})
     st.rerun()
@@ -387,7 +700,7 @@ def _render_hub_composer(mode: str, model: str, temperature: float) -> None:
         if chip:
             st.session_state[widget_key] = chip
         has_msgs = bool(st.session_state.excel_ai_messages)
-        placeholder = "Ask about your spreadsheet…"
+        placeholder = "Ask about your spreadsheet(s)…"
 
     if has_msgs:
         st.markdown('<span id="bst-clear-chat-row"></span>', unsafe_allow_html=True)
@@ -417,28 +730,42 @@ def _render_hub_composer(mode: str, model: str, temperature: float) -> None:
         return
     text = str(prompt).strip()
     if mode == MODE_CHAT:
-        _submit_chat(model, temperature, text)
+        msgs = st.session_state.messages
+        if not msgs or msgs[-1]["role"] != "user" or msgs[-1]["content"] != text:
+            st.session_state.messages.append({"role": "user", "content": text})
+            st.session_state[_BST_PENDING_CHAT_GEN] = (model, temperature)
+            st.session_state.chat_input_counter += 1
+            st.rerun()
         return
-    df: pd.DataFrame | None = st.session_state.excel_ai_df
-    if df is None:
-        st.warning("Upload a spreadsheet first.")
-    else:
-        _submit_excel(model, temperature, df, text)
+    files = _excel_files()
+    if not files:
+        st.warning("Upload at least one spreadsheet first.")
+        return
+    msgs = st.session_state.excel_ai_messages
+    if not (
+        msgs
+        and msgs[-1]["role"] == "user"
+        and msgs[-1]["content"] == text
+        and not msgs[-1].get("_hidden")
+    ):
+        st.session_state.excel_ai_messages.append({"role": "user", "content": text})
+    st.session_state[_BST_PENDING_EXCEL_GEN] = (model, temperature)
+    st.session_state.excel_ai_input_counter += 1
+    st.rerun()
 
 
 # ── Mode toggle (below input) ─────────────────────────────────────────────────
 
 def _render_mode_toggle(mode: str) -> None:
     """
-    Chat mode  → "Analyze Excel" pill.  Click → enter Excel mode.
+    Chat mode  → compact pill to enter Excel (narrow center column, not a full-width bar).
     Excel mode → small "×" circle.  Click → exit.
-    Both are centered below the input bar.
     """
     st.markdown("<div style='height:.3rem'></div>", unsafe_allow_html=True)
 
     if mode == MODE_CHAT:
         st.markdown('<span id="bst-mode-toggle-chat"></span>', unsafe_allow_html=True)
-        _, c, _ = st.columns([0.7, 3, 0.7])
+        _, c, _ = st.columns([2.5, 1.05, 2.5])
         with c:
             if st.button(
                 "Analyze Excel",
@@ -462,36 +789,48 @@ def _render_mode_toggle(mode: str) -> None:
                 _restore_main_hub()
                 st.rerun()
 
+    _hub_excel_chip_styles()
+
 
 # ── Hub page ──────────────────────────────────────────────────────────────────
 
 def _render_hub(model: str, temperature: float) -> None:
     mode = st.session_state.hub_mode
 
-    if mode == MODE_CHAT:
-        visible_msgs = st.session_state.messages
-    else:
-        visible_msgs = [
-            m for m in st.session_state.excel_ai_messages if not m.get("_hidden")
-        ]
-
-    has_msgs = bool(visible_msgs)
-
     st.markdown('<span id="bst-hub-page"></span>', unsafe_allow_html=True)
 
-    _, mid, _ = st.columns([0.7, 3, 0.7])
+    _, mid, _ = st.columns([0.35, 8, 0.35])
     with mid:
         st.markdown('<span id="bst-hub-anchor"></span>', unsafe_allow_html=True)
+        st.markdown(
+            '<span id="bst-hub-chat-styling-root" aria-hidden="true"></span>',
+            unsafe_allow_html=True,
+        )
+        _hub_drain_pending_chat_submit(model, temperature)
+
+        if mode == MODE_CHAT:
+            visible_msgs = st.session_state.messages
+        else:
+            visible_msgs = [
+                m for m in st.session_state.excel_ai_messages if not m.get("_hidden")
+            ]
+
+        has_msgs = bool(visible_msgs)
+
         if has_msgs:
             st.markdown('<span id="bst-hub-has-msgs"></span>', unsafe_allow_html=True)
 
         if mode == MODE_EXCEL and has_msgs:
+            st.markdown(
+                '<span id="bst-hub-excel-mode" aria-hidden="true"></span>',
+                unsafe_allow_html=True,
+            )
             _render_excel_context_compact()
         elif mode == MODE_EXCEL:
             st.markdown(f"# {WELCOME_HEADING}")
             st.markdown(
-                '<p class="bst-hub-tagline">'
-                "Excel mode — upload a file and ask about its data."
+                '<p class="bst-hub-tagline bst-hub-tagline--excel">'
+                "Excel mode — upload one or more files and ask about their data."
                 "</p>",
                 unsafe_allow_html=True,
             )
@@ -503,8 +842,12 @@ def _render_hub(model: str, temperature: float) -> None:
             st.markdown('<span id="bst-hub-thread"></span>', unsafe_allow_html=True)
             with st.container(height=520, border=False):
                 for m in visible_msgs:
-                    with st.chat_message(m["role"]):
-                        st.markdown(m["content"])
+                    with _hub_chat_message(m["role"]):
+                        _hub_message_body_markdown(m["content"], role=m["role"])
+                if mode == MODE_CHAT and st.session_state.get(_BST_PENDING_CHAT_GEN):
+                    _hub_complete_pending_chat_generation(model, temperature)
+                elif mode == MODE_EXCEL and st.session_state.get(_BST_PENDING_EXCEL_GEN):
+                    _hub_complete_pending_excel_generation(model, temperature)
             st.markdown('<span id="bst-hub-thread-end"></span>', unsafe_allow_html=True)
             _hub_scroll_to_bottom()
 
@@ -706,6 +1049,91 @@ def _fm_merge_step(number: int, title: str, description: str) -> None:
         "</div></div>",
         unsafe_allow_html=True,
     )
+
+
+def _sidebar_fm_popover_bind() -> None:
+    """Merge-tab-style hover popover on the sidebar File Manager button (not Streamlit help)."""
+    popover_html = (
+        "<strong>Excel File Manager</strong>"
+        "<p>Work manually: upload spreadsheets, preview data, merge by keys "
+        "with averaging, and download results—without using chat.</p>"
+    )
+    body_js = popover_html.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "")
+    components.html(
+        "<script>(function(){"
+        "const d=window.parent.document;"
+        "const body='" + body_js + "';"
+        "let boundBtn=null;let hideTimer=null;"
+        "const findBtn=()=>{"
+        "const byKey=d.querySelector('[class*=\"st-key-sidebar_open_file_manager\"] button');"
+        "if(byKey)return byKey;"
+        "const wrap=d.querySelector('[class*=\"st-key-sidebar_open_file_manager\"]');"
+        "if(wrap){const b=wrap.querySelector('button');if(b)return b;}"
+        "const anchor=d.getElementById('bst-sidebar-fm-nav');"
+        "if(!anchor)return null;"
+        "let sib=anchor;"
+        "for(let j=0;j<8&&sib;j++){"
+        "sib=sib.nextElementSibling;"
+        "const b=sib&&sib.querySelector?sib.querySelector('button'):null;"
+        "if(b)return b;}"
+        "return null;};"
+        "const ensure=()=>{let p=d.getElementById('bst-sidebar-fm-popover');"
+        "if(!p){p=d.createElement('div');p.id='bst-sidebar-fm-popover';"
+        "p.className='bst-sidebar-fm-popover';"
+        "p.setAttribute('role','tooltip');p.innerHTML=body;"
+        "(d.querySelector('.stApp')||d.body).appendChild(p);}"
+        "return p;};"
+        "const bind=()=>{"
+        "const btn=findBtn();const pop=ensure();"
+        "if(!btn||btn===boundBtn)return;"
+        "boundBtn=btn;"
+        "const show=()=>{"
+        "if(hideTimer){clearTimeout(hideTimer);hideTimer=null;}"
+        "const r=btn.getBoundingClientRect();"
+        "const w=Math.min(352,Math.max(260,r.width+40));"
+        "pop.style.width=w+'px';"
+        "pop.style.left=Math.min(Math.max(8,r.right+10),window.parent.innerWidth-w-8)+'px';"
+        "pop.style.top=Math.max(8,r.top)+'px';"
+        "pop.classList.add('is-visible');};"
+        "const hide=()=>{hideTimer=setTimeout(()=>pop.classList.remove('is-visible'),140);};"
+        "btn.addEventListener('mouseenter',show);"
+        "btn.addEventListener('mouseleave',hide);"
+        "btn.addEventListener('focus',show);"
+        "btn.addEventListener('blur',hide);"
+        "pop.addEventListener('mouseenter',show);"
+        "pop.addEventListener('mouseleave',hide);};"
+        "bind();"
+        "new MutationObserver(bind).observe(d.body,{childList:true,subtree:true});"
+        "[30,120,350,700,1200].forEach((ms)=>setTimeout(bind,ms));"
+        "})();</script>",
+        height=0,
+        scrolling=False,
+    )
+
+
+def _render_sidebar_file_manager_nav() -> None:
+    """Sidebar entry for manual upload / merge / download (distinct from hub chat)."""
+    active = st.session_state.nav_page == NAV_FILE_MANAGER
+    active_cls = " bst-sidebar-fm-anchor--active" if active else ""
+    st.markdown(
+        '<p class="bst-sidebar-fm-kicker">Prefer manual control?</p>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f'<span id="bst-sidebar-fm-nav" class="bst-sidebar-fm-anchor{active_cls}" '
+        'aria-hidden="true"></span>',
+        unsafe_allow_html=True,
+    )
+    if st.button(
+        "Excel File Manager",
+        key="sidebar_open_file_manager",
+        type="secondary",
+        use_container_width=True,
+    ):
+        st.session_state.nav_page = NAV_FILE_MANAGER
+        st.rerun()
+    st.caption("Upload · preview · merge · download")
+    _sidebar_fm_popover_bind()
 
 
 def _sidebar_show_error(title: str, exc: Exception) -> None:
@@ -1020,7 +1448,7 @@ def _render_fm_file_list(paths: list[Path]) -> None:
                 unsafe_allow_html=True,
             )
             try:
-                st.dataframe(read_table(p).head(10), use_container_width=True)
+                _render_scrollable_dataframe(read_table(p))
             except Exception as e:  # noqa: BLE001
                 st.error(str(e))
 
@@ -1126,7 +1554,7 @@ def _render_file_manager(up: Path, out: Path) -> None:
 
         st.markdown(
             '<header class="bst-fm-header">'
-            "<h2>File Manager</h2>"
+            "<h2>Excel File Manager</h2>"
             "<p>Upload, preview, merge spreadsheets, and download results.</p>"
             "</header>",
             unsafe_allow_html=True,
@@ -1180,10 +1608,6 @@ def main() -> None:
         st.session_state.ollama_base = st.text_input(
             "Base URL", value=st.session_state.ollama_base
         )
-        model_default = st.session_state.get("model_name", "llama3.2")
-        model = st.text_input("Model", value=model_default)
-        st.session_state.model_name = model
-        temperature = st.slider("Temperature", 0.0, 1.5, 0.7, 0.05)
         st.caption(
             "Default: `http://127.0.0.1:11434`  \n"
             "WinError 10061 = Ollama not running."
@@ -1199,21 +1623,40 @@ def main() -> None:
         if st.button("List models", use_container_width=True, key="ollama_models_btn"):
             try:
                 st.session_state.ollama_models = list_models(st.session_state.ollama_base)
+                models = st.session_state.ollama_models
+                cur = st.session_state.model_name
+                if cur in models:
+                    st.session_state[BST_INSTALLED_MODEL_PICK_KEY] = cur
+                elif models:
+                    first = models[0]
+                    st.session_state[BST_INSTALLED_MODEL_PICK_KEY] = first
+                    st.session_state.model_name = first
                 st.success(f"Found {len(st.session_state.ollama_models)} model(s)")
             except Exception as e:  # noqa: BLE001
                 _sidebar_show_error("Could not list models.", e)
 
-        if "ollama_models" in st.session_state and st.session_state.ollama_models:
+        if st.session_state.get("ollama_models"):
+            models = st.session_state.ollama_models
+            pick = st.session_state.get(BST_INSTALLED_MODEL_PICK_KEY)
+            if pick not in models:
+                cur = st.session_state.model_name
+                if cur in models:
+                    st.session_state[BST_INSTALLED_MODEL_PICK_KEY] = cur
+                else:
+                    st.session_state[BST_INSTALLED_MODEL_PICK_KEY] = models[0]
+                    st.session_state.model_name = models[0]
             st.selectbox(
                 "Installed models",
-                options=st.session_state.ollama_models,
-                key="_model_pick",
+                options=models,
+                key=BST_INSTALLED_MODEL_PICK_KEY,
+                on_change=_on_installed_model_pick_change,
             )
 
+        st.text_input("Model", key="model_name")
+        temperature = st.slider("Temperature", 0.0, 1.5, 0.7, 0.05)
+
         st.divider()
-        if st.button("File Manager", use_container_width=True):
-            st.session_state.nav_page = NAV_FILE_MANAGER
-            st.rerun()
+        _render_sidebar_file_manager_nav()
 
         st.divider()
         st.caption("Favicon attribution")
@@ -1223,7 +1666,7 @@ def main() -> None:
         )
 
     if st.session_state.nav_page == NAV_HUB:
-        _render_hub(model, temperature)
+        _render_hub(st.session_state.model_name, temperature)
     else:
         _render_file_manager(up, out)
 

@@ -32,6 +32,30 @@ def explain_connection_error(base_url: str, exc: BaseException) -> str:
     )
 
 
+def _chat_http_error_message(status_code: int, url: str, body_preview: str, model: str) -> str:
+    """Explain chat failures (tags/list can work while chat returns 4xx)."""
+    snippet = body_preview.strip()[:600] if body_preview else "(empty body)"
+    if status_code == 404:
+        return (
+            f"HTTP 404 from `{url}`.\n\n"
+            "**Why Test connection can still succeed**\n"
+            "- **Test connection** uses `GET /api/tags` (list models).\n"
+            "- Chat uses `POST /api/chat`. A 404 here usually means a **wrong or missing model "
+            f"name** (`{model}`) or the server is **not full Ollama** on that URL.\n\n"
+            "**What to try**\n"
+            "1. Click **List models** and set **Model** to an **exact** name from the list "
+            "(e.g. `llama3.2:latest`, not a typo).\n"
+            "2. On the server run `ollama pull <that-name>` if the model is not installed.\n"
+            "3. If this is a proxy / gateway, confirm it supports Ollama’s `/api/chat`.\n\n"
+            f"Response snippet: `{snippet}`"
+        )
+    return (
+        f"HTTP {status_code} from `{url}`.\n\n"
+        f"Model: `{model}`\n"
+        f"Response snippet: `{snippet}`"
+    )
+
+
 def chat(
     base_url: str,
     model: str,
@@ -50,7 +74,10 @@ def chat(
     try:
         with httpx.Client(timeout=timeout_s) as client:
             r = client.post(url, json=payload)
-            r.raise_for_status()
+            if r.status_code >= 400:
+                raise RuntimeError(
+                    _chat_http_error_message(r.status_code, url, r.text or "", model)
+                )
             data = r.json()
     except (httpx.ConnectError, ConnectionRefusedError, OSError) as e:
         raise RuntimeError(explain_connection_error(base_url, e)) from e

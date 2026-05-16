@@ -57,22 +57,35 @@
   }
 }
 
-/* Rotating tagline (3 phrases, ~4s each) */
+/* Rotating tagline (3 phrases, ~4s each) — center with translate(-50%, …); translateY-only
+   keyframes would wipe horizontal centering from the cascade. */
 .bst-tagline-cycle {
   position: relative;
+  width: 100%;
+  max-width: 100%;
   height: 1.55em;
   overflow: hidden;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .bst-tagline-cycle__line {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: calc(100% - 0.5rem);
+  box-sizing: border-box;
   margin: 0;
+  padding: 0 0.25rem;
+  text-align: center;
   opacity: 0;
   animation-duration: 12s;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
+  /* Initial offset; keyframes must keep translateX(-50%) on every step */
+  transform: translate(-50%, 0.35rem);
 }
 
 .bst-tagline-cycle__line:nth-child(1) {
@@ -91,12 +104,12 @@
   0%,
   28% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
   }
   33%,
   100% {
     opacity: 0;
-    transform: translateY(0.2rem);
+    transform: translate(-50%, 0.2rem);
   }
 }
 
@@ -104,17 +117,17 @@
   0%,
   30% {
     opacity: 0;
-    transform: translateY(0.2rem);
+    transform: translate(-50%, 0.2rem);
   }
   33%,
   61% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
   }
   66%,
   100% {
     opacity: 0;
-    transform: translateY(-0.2rem);
+    transform: translate(-50%, -0.2rem);
   }
 }
 
@@ -122,16 +135,16 @@
   0%,
   63% {
     opacity: 0;
-    transform: translateY(0.2rem);
+    transform: translate(-50%, 0.2rem);
   }
   66%,
   94% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
   }
   100% {
     opacity: 0;
-    transform: translateY(-0.2rem);
+    transform: translate(-50%, -0.2rem);
   }
 }
 
@@ -147,10 +160,19 @@
 
   .bst-tagline-cycle {
     height: auto;
+    text-align: center;
   }
 
   .bst-tagline-cycle__line {
     position: static;
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 0.25rem;
+    transform: none;
+    text-align: center;
     animation: none;
     opacity: 0;
   }

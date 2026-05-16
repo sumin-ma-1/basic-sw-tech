@@ -28,6 +28,31 @@
   --bst-shadow-md: 0 4px 20px rgba(15, 23, 42, 0.07);
 
   --bst-transition: 0.18s ease;
+
+  /* Hub conversation thread */
+  --bst-chat-thread-bg-top: rgba(241, 245, 249, 0.55);
+  --bst-chat-thread-bg-bottom: rgba(255, 255, 255, 0.92);
+  --bst-chat-thread-border: rgba(226, 232, 240, 0.95);
+  --bst-chat-assistant-bg: rgba(255, 255, 255, 0.95);
+  --bst-chat-assistant-border: rgba(226, 232, 240, 1);
+  --bst-chat-user-bg: rgba(13, 148, 136, 0.11);
+  --bst-chat-user-border: rgba(13, 148, 136, 0.28);
+  --bst-chat-bubble-shadow: 0 2px 14px rgba(15, 23, 42, 0.055);
+  /* Same horizontal cap for user + assistant (assistant slightly under old 70rem) */
+  --bst-hub-chat-bubble-max: min(96%, 66rem);
+
+  /* Hub Excel chip — teal-cyan (harmonizes with --bst-primary) */
+  --bst-excel-chip-bg-top: #f0fdfa;
+  --bst-excel-chip-bg-bottom: #ccfbf1;
+  --bst-excel-chip-border: #5eead4;
+  --bst-excel-chip-ink: #0f766e;
+  --bst-excel-chip-hover-bg: #99f6e4;
+  --bst-excel-chip-hover-border: #2dd4bf;
+  --bst-excel-chip-hover-ink: #115e59;
+  --bst-excel-chip-shadow: 0 1px 3px rgba(13, 148, 136, 0.14);
+  --bst-excel-chip-shadow-hover: 0 2px 8px rgba(13, 148, 136, 0.22);
+  --bst-excel-chip-lift: -2px;
+  --bst-excel-chip-lift-shadow: 0 4px 14px rgba(13, 148, 136, 0.24);
 }
 
 /* Streamlit dark theme (set on <html> when dark mode is on) */
@@ -48,6 +73,26 @@ html[data-theme="dark"] {
   --bst-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
   --bst-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
   --bst-shadow-md: 0 4px 24px rgba(0, 0, 0, 0.4);
+
+  --bst-chat-thread-bg-top: rgba(30, 41, 59, 0.45);
+  --bst-chat-thread-bg-bottom: rgba(15, 23, 42, 0.72);
+  --bst-chat-thread-border: rgba(51, 65, 85, 0.95);
+  --bst-chat-assistant-bg: rgba(30, 41, 59, 0.92);
+  --bst-chat-assistant-border: rgba(71, 85, 105, 0.95);
+  --bst-chat-user-bg: rgba(45, 212, 191, 0.1);
+  --bst-chat-user-border: rgba(45, 212, 191, 0.35);
+  --bst-chat-bubble-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
+  --bst-hub-chat-bubble-max: min(96%, 66rem);
+
+  --bst-excel-chip-bg-top: rgba(45, 212, 191, 0.16);
+  --bst-excel-chip-bg-bottom: rgba(13, 148, 136, 0.14);
+  --bst-excel-chip-border: rgba(45, 212, 191, 0.48);
+  --bst-excel-chip-ink: #5eead4;
+  --bst-excel-chip-hover-bg: rgba(45, 212, 191, 0.26);
+  --bst-excel-chip-hover-border: #2dd4bf;
+  --bst-excel-chip-hover-ink: #ccfbf1;
+  --bst-excel-chip-shadow: 0 1px 4px rgba(13, 148, 136, 0.28);
+  --bst-excel-chip-shadow-hover: 0 2px 10px rgba(13, 148, 136, 0.35);
 }
 
 /* ── App shell ─────────────────────────────────────────────────────────────── */
@@ -163,6 +208,69 @@ section[data-testid="stSidebar"] .block-container {
   overflow-x: hidden;
 }
 
+/* ── Sidebar: Excel File Manager (manual workflow) ─────────────────────────── */
+section[data-testid="stSidebar"] .bst-sidebar-fm-kicker {
+  margin: 0 0 0.4rem;
+  padding: 0 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bst-muted-2);
+  line-height: 1.35;
+}
+
+.stApp [class*="st-key-sidebar_open_file_manager"] {
+  position: relative;
+  margin: 0 0 0.15rem !important;
+}
+
+.stApp [class*="st-key-sidebar_open_file_manager"] .stButton > button,
+.stApp [class*="st-key-sidebar_open_file_manager"] [data-testid="baseButton-secondary"] {
+  text-align: left !important;
+  padding: 0.62rem 0.85rem !important;
+  font-size: 0.86rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+}
+
+.stApp [class*="st-key-sidebar_open_file_manager"] .stButton > button p,
+.stApp [class*="st-key-sidebar_open_file_manager"] .stButton > button span {
+  color: inherit !important;
+  margin: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-fm-anchor--active)
+  [class*="st-key-sidebar_open_file_manager"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-fm-anchor--active)
+  [class*="st-key-sidebar_open_file_manager"]
+  [data-testid="baseButton-secondary"] {
+  border-color: var(--bst-border-strong) !important;
+  font-weight: 650 !important;
+}
+
+section[data-testid="stSidebar"]
+  [class*="st-key-sidebar_open_file_manager"]
+  + div[data-testid="stElementContainer"]
+  [data-testid="stCaptionContainer"],
+section[data-testid="stSidebar"]
+  [class*="st-key-sidebar_open_file_manager"]
+  ~ div[data-testid="stElementContainer"]:has([data-testid="stCaptionContainer"]) {
+  margin-top: -0.15rem !important;
+}
+
+section[data-testid="stSidebar"]
+  [class*="st-key-sidebar_open_file_manager"]
+  ~ div:has([data-testid="stCaptionContainer"])
+  p {
+  font-size: 0.72rem !important;
+  color: var(--bst-muted-2) !important;
+  text-align: center !important;
+  line-height: 1.35 !important;
+}
+
 /* ── Tagline ─────────────────────────────────────────────────────────────────── */
 .bst-hub-tagline {
   text-align: center;
@@ -174,6 +282,23 @@ section[data-testid="stSidebar"] .block-container {
   max-width: 36rem;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Rotating phrases: use full hub column width so translate(-50%, …) centers in the viewport */
+.bst-hub-tagline.bst-tagline-cycle {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Excel empty-state intro (single line, no cycle) */
+.bst-hub-tagline--excel {
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center !important;
+  box-sizing: border-box;
 }
 
 /* ── File manager — clean layout, cards, readable type ─────────────────────── */
@@ -738,6 +863,46 @@ section[data-testid="stMain"]:has(#bst-file-manager-page)
   box-shadow: var(--bst-shadow-xs) !important;
 }
 
+/* Excel / FM previews — vertical + horizontal scroll inside the grid */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stExpander"]
+  div[data-testid="stDataFrame"],
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  .bst-fm-preview-anchor ~ div[data-testid="stElementContainer"]:has([data-testid="stDataFrame"])
+  div[data-testid="stDataFrame"] {
+  overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  max-height: min(70vh, 480px) !important;
+  max-width: 100% !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stExpander"]
+  [data-testid="stDataFrame"]
+  [data-testid="glideDataEditor"],
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  .bst-fm-preview-anchor ~ div[data-testid="stElementContainer"]:has([data-testid="stDataFrame"])
+  [data-testid="stDataFrame"]
+  [data-testid="glideDataEditor"] {
+  overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  max-width: 100% !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stExpander"]
+  [data-testid="stDataFrame"]
+  .dvn-scroller,
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  .bst-fm-preview-anchor ~ div[data-testid="stElementContainer"]:has([data-testid="stDataFrame"])
+  .dvn-scroller {
+  overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
 /* Page header */
 .bst-fm-header {
   display: block;
@@ -1160,6 +1325,46 @@ section[data-testid="stMain"]:has(#bst-file-manager-page)
   pointer-events: auto;
 }
 
+/* Sidebar File Manager — fixed tooltip (JS toggles .is-visible) */
+.bst-sidebar-fm-popover {
+  position: fixed;
+  z-index: 999999;
+  width: min(22rem, calc(100vw - 1.5rem));
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  background: var(--bst-surface-elevated);
+  border: 1px solid var(--bst-border);
+  border-radius: var(--bst-radius-md);
+  box-shadow: var(--bst-shadow-md);
+  color: var(--bst-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+  pointer-events: none;
+}
+
+.bst-sidebar-fm-popover strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--bst-ink);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.bst-sidebar-fm-popover p {
+  margin: 0;
+}
+
+.bst-sidebar-fm-popover.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 /* File / output rows — unified card strip */
 section[data-testid="stMain"]:has(#bst-file-manager-page) .bst-fm-file-row {
   display: block;
@@ -1543,7 +1748,7 @@ section[data-testid="stMain"]:has(#bst-clear-chat-row)
 
 /* ── Hub layout: empty = vertically centered; chat = stack above composer ─── */
 section[data-testid="stMain"]:has(#bst-hub-page) > div.block-container {
-  max-width: 60rem !important;
+  max-width: min(96vw, 82rem) !important;
   margin-left: auto !important;
   margin-right: auto !important;
 }
@@ -1567,20 +1772,35 @@ section[data-testid="stMain"]:has(#bst-hub-has-msgs)
 }
 
 /* Scrollable thread: latest at bottom, scroll up for history */
-section[data-testid="stMain"]:has(#bst-hub-thread)
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
   #bst-hub-thread
   + div[data-testid="stVerticalBlockBorderWrapper"] {
   flex: 1 1 auto !important;
   min-height: 10rem !important;
-  max-height: min(calc(100dvh - 15.5rem), 560px) !important;
+  max-height: min(calc(100dvh - 17rem), 540px) !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   margin-bottom: 0.35rem !important;
-  padding-right: 0.2rem !important;
+  padding: 0.85rem 0.65rem 1rem 0.75rem !important;
   scroll-behavior: auto;
+  border-radius: var(--bst-radius-lg) !important;
+  background: linear-gradient(
+    165deg,
+    var(--bst-chat-thread-bg-top),
+    var(--bst-chat-thread-bg-bottom)
+  ) !important;
+  border: 1px solid var(--bst-chat-thread-border) !important;
+  box-shadow: var(--bst-shadow-xs), inset 0 1px 0 rgba(255, 255, 255, 0.42) !important;
 }
 
-section[data-testid="stMain"]:has(#bst-hub-thread)
+html[data-theme="dark"]
+  section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  #bst-hub-thread
+  + div[data-testid="stVerticalBlockBorderWrapper"] {
+  box-shadow: var(--bst-shadow-xs), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
   #bst-hub-thread
   + div[data-testid="stVerticalBlockBorderWrapper"]
   > div[data-testid="stVerticalBlock"] {
@@ -1588,7 +1808,8 @@ section[data-testid="stMain"]:has(#bst-hub-thread)
   flex-direction: column !important;
   justify-content: flex-end !important;
   min-height: 100% !important;
-  gap: 0.15rem !important;
+  gap: 2.45rem !important;
+  row-gap: 2.45rem !important;
 }
 
 section[data-testid="stMain"]:has(#bst-hub-has-msgs) > div.block-container {
@@ -1629,6 +1850,63 @@ section[data-testid="stMain"]:has(#bst-hub-page)
   text-align: center;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Rotating welcome lines: Streamlit wrappers often shrink or left-align markdown */
+section[data-testid="stMain"]:has(#bst-hub-page)
+  div[data-testid="column"]:has(#bst-hub-anchor)
+  div[data-testid="element-container"]:has(.bst-tagline-cycle),
+section[data-testid="stMain"]:has(#bst-hub-page)
+  div[data-testid="column"]:has(#bst-hub-anchor)
+  [data-testid="stMarkdownContainer"]:has(.bst-tagline-cycle) {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-page)
+  div[data-testid="column"]:has(#bst-hub-anchor)
+  [data-testid="stMarkdownContainer"]:has(.bst-tagline-cycle)
+  > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+/* Excel mode intro: Streamlit wrappers (same issue as rotating tagline) */
+section[data-testid="stMain"]:has(#bst-hub-page)
+  div[data-testid="column"]:has(#bst-hub-anchor)
+  div[data-testid="element-container"]:has(.bst-hub-tagline--excel),
+section[data-testid="stMain"]:has(#bst-hub-page)
+  div[data-testid="column"]:has(#bst-hub-anchor)
+  [data-testid="stMarkdownContainer"]:has(.bst-hub-tagline--excel) {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-page)
+  div[data-testid="column"]:has(#bst-hub-anchor)
+  [data-testid="stMarkdownContainer"]:has(.bst-hub-tagline--excel)
+  > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-page)
+  div[data-testid="column"]:has(#bst-hub-anchor)
+  .bst-tagline-cycle,
+section[data-testid="stMain"]:has(#bst-hub-page)
+  div[data-testid="column"]:has(#bst-hub-anchor)
+  .bst-tagline-cycle__line {
+  text-align: center !important;
 }
 
 /* ── Chat input (hub composer) ─────────────────────────────────────────────── */
@@ -1802,42 +2080,488 @@ button[kind="secondary"]:hover {
   color: var(--bst-accent) !important;
 }
 
-/* ── Chat bubbles ──────────────────────────────────────────────────────────── */
-[data-testid="stChatMessage"] {
-  border-radius: var(--bst-radius-lg) !important;
+/* ── Hub conversation bubbles (thread layout — chat UI lives only on hub) ──── */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root) [data-testid="stChatMessage"] {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 0.65rem !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  padding-block: 0.55rem !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+/* Hidden role markers for reliable left/right styling (not shown as bubbles) */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stMarkdownContainer"]:has(.bst-msg-marker) {
+  display: none !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user) {
+  /*
+   * DOM is [avatar slot][body]; avatar is hidden via CSS. row-reverse + flex-start
+   * keeps the bubble aligned to the right with symmetric horizontal inset.
+   */
+  width: 100% !important;
+  flex-direction: row-reverse !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  padding-inline: clamp(0.85rem, 4.5vw, 2.5rem) !important;
+  box-sizing: border-box !important;
+  gap: 0.42rem !important;
+}
+
+/*
+ * Streamlit 1.57: message body is [data-testid="stChatMessageContent"] with default
+ * horizontal padding — removes extra inset next to the (hidden) avatar slot.
+ */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stChatMessageContent"] {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  gap: 0 !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stChatMessageContent"]
+  [data-testid="stVerticalBlockBorderWrapper"] {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  max-width: var(--bst-hub-chat-bubble-max) !important;
+  box-sizing: border-box !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stChatMessageContent"]
+  [data-testid="stVerticalBlock"],
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stChatMessageContent"]
+  [data-testid="element-container"] {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: var(--bst-hub-chat-bubble-max) !important;
+  box-sizing: border-box !important;
+}
+
+/* User messages: no avatar — collapse Streamlit’s avatar column */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  > div:first-child {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  flex: 0 0 0 !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant)
+  [data-testid^="stChatMessageAvatar"] {
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+/* Assistant favicon: modest size, not a “chip” tray */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant)
+  [data-testid^="stChatMessageAvatar"]
+  img {
+  width: 2rem !important;
+  height: 2rem !important;
+  max-width: 2.25rem !important;
+  max-height: 2.25rem !important;
+  object-fit: contain !important;
+  border-radius: 6px !important;
+  display: block !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant) {
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 0.42rem !important;
+  /* Match user row gutters so the two sides feel balanced */
+  padding-inline: clamp(0.85rem, 4.5vw, 2.5rem) !important;
+  padding-right: clamp(0.75rem, 12vw, 8rem) !important;
+  box-sizing: border-box !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:hover {
+  box-shadow: none !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  > div:first-child {
+  flex-shrink: 0 !important;
+  margin-top: 0.15rem !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  > div:last-child {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/*
+ * Bubble chrome on stChatMessageContent (wraps marker + body). Markdown wrappers stay
+ * transparent so width="stretch" / "content" resize inside the shell, not past it.
+ */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant):not(:has(.bst-wait-wrap))
+  > div:last-child {
+  flex: 0 0 auto !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: var(--bst-hub-chat-bubble-max) !important;
+  align-items: flex-start !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  > div:last-child {
+  flex: 0 0 auto !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: var(--bst-hub-chat-bubble-max) !important;
+  align-items: flex-end !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant):not(:has(.bst-wait-wrap))
+  [data-testid="stChatMessageContent"] {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: var(--bst-hub-chat-bubble-max) !important;
+  box-sizing: border-box !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  overflow: hidden !important;
+  padding: 0.72rem 1rem !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  border-radius: 1rem 1.15rem 1.15rem 0.35rem !important;
+  background: var(--bst-chat-assistant-bg) !important;
+  border: 1px solid var(--bst-chat-assistant-border) !important;
+  box-shadow: var(--bst-chat-bubble-shadow) !important;
+  color: var(--bst-ink) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stChatMessageContent"] {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: var(--bst-hub-chat-bubble-max) !important;
+  box-sizing: border-box !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  overflow: hidden !important;
+  padding: 0.72rem 1rem !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  border-radius: 1.15rem 1rem 0.35rem 1.15rem !important;
+  background: var(--bst-chat-user-bg) !important;
+  border: 1px solid var(--bst-chat-user-border) !important;
+  box-shadow: var(--bst-chat-bubble-shadow) !important;
+  color: var(--bst-ink) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant):not(:has(.bst-wait-wrap))
+  [data-testid="stChatMessageContent"]
+  [data-testid="stVerticalBlockBorderWrapper"],
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant):not(:has(.bst-wait-wrap))
+  [data-testid="stChatMessageContent"]
+  [data-testid="stVerticalBlock"],
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant):not(:has(.bst-wait-wrap))
+  [data-testid="stElementContainer"],
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stChatMessageContent"]
+  [data-testid="stVerticalBlockBorderWrapper"],
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stChatMessageContent"]
+  [data-testid="stVerticalBlock"],
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stElementContainer"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant):not(:has(.bst-wait-wrap))
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker)),
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker)) {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant):not(:has(.bst-wait-wrap))
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker))
+  > div,
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant):not(:has(.bst-wait-wrap))
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker))
+  [data-testid="stMarkdown"],
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker))
+  > div,
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker))
+  [data-testid="stMarkdown"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-assistant):not(:has(.bst-wait-wrap))
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker))
+  table {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  box-sizing: border-box !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stMarkdownContainer"]
+  p,
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stMarkdownContainer"]
+  li {
+  font-size: 0.9375rem !important;
+  line-height: 1.58 !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+}
+
+/* User short lines: shared rule above uses break-word; keep single words on one line */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker))
+  p,
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-msg-marker-user)
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker))
+  li {
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  white-space: normal !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stMarkdownContainer"]
+  p:not(:last-child),
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stMarkdownContainer"]
+  ul,
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stMarkdownContainer"]
+  ol {
+  margin-bottom: 0.45rem !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stMarkdownContainer"]
+  p:last-child {
+  margin-bottom: 0 !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  pre {
+  margin: 0.45rem 0 0 !important;
+  padding: 0.65rem 0.75rem !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  border-radius: var(--bst-radius-md) !important;
+  font-size: 0.82rem !important;
+  line-height: 1.45 !important;
   border: 1px solid var(--bst-border) !important;
-  margin-bottom: 0.65rem !important;
-  overflow: hidden;
-  box-shadow: var(--bst-shadow-xs);
-  transition: box-shadow var(--bst-transition);
+  background: rgba(15, 23, 42, 0.04) !important;
 }
 
-[data-testid="stChatMessage"]:hover {
-  box-shadow: var(--bst-shadow-sm);
+html[data-theme="dark"]
+  section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  pre {
+  background: rgba(0, 0, 0, 0.28) !important;
 }
 
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-  background: var(--bst-surface-elevated) !important;
-  margin-right: clamp(4%, 8%, 12%) !important;
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stMarkdownContainer"]
+  a {
+  color: var(--bst-accent) !important;
+  font-weight: 550 !important;
+  text-decoration: none !important;
 }
 
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-  background: var(--bst-surface-2) !important;
-  margin-left: clamp(4%, 8%, 12%) !important;
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stMarkdownContainer"]
+  a:hover {
+  text-decoration: underline !important;
 }
 
-[data-testid="stChatMessage"] [data-testid="stVerticalBlock"] {
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]
+  [data-testid="stVerticalBlock"] {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  gap: 0 !important;
 }
 
-[data-testid="stChatMessage"] a {
-  color: var(--bst-accent);
-  text-decoration: none;
-  font-weight: 500;
+/* Thinking / waiting — no bubble; muted text + animated dots only */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-wait-wrap)
+  > div:last-child {
+  flex: 0 0 auto !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: var(--bst-hub-chat-bubble-max) !important;
+  align-items: flex-start !important;
+  overflow: visible !important;
 }
-[data-testid="stChatMessage"] a:hover {
-  text-decoration: underline;
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-wait-wrap)
+  [data-testid="stChatMessageContent"] {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: var(--bst-hub-chat-bubble-max) !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-wait-wrap)
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker)) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-wait-wrap)
+  [data-testid="stMarkdownContainer"]:not(:has(.bst-msg-marker))
+  > div {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(.bst-wait-wrap)
+  .bst-wait-wrap {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: max-content !important;
+  box-sizing: border-box !important;
+}
+
+/* Excel thread: reply bubbles cannot exceed the scroll column (not thinking text) */
+section[data-testid="stMain"]:has(#bst-hub-excel-mode)
+  #bst-hub-thread
+  + div[data-testid="stVerticalBlockBorderWrapper"]
+  [data-testid="stChatMessage"]:not(:has(.bst-wait-wrap))
+  [data-testid="stChatMessageContent"] {
+  max-width: min(100%, var(--bst-hub-chat-bubble-max)) !important;
 }
 
 /* ── Alerts & info ─────────────────────────────────────────────────────────── */
@@ -1882,6 +2606,31 @@ div[data-testid="stDataFrame"] {
   box-shadow: var(--bst-shadow-xs);
 }
 
+/* Preview tables — allow horizontal scroll (override clip above) */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stExpander"]
+  div[data-testid="stDataFrame"],
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  .bst-fm-preview-anchor ~ div[data-testid="stElementContainer"]:has([data-testid="stDataFrame"])
+  div[data-testid="stDataFrame"] {
+  overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stExpander"]
+  div[data-testid="stDataFrame"]
+  .dvn-scroller,
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  .bst-fm-preview-anchor ~ div[data-testid="stElementContainer"]:has([data-testid="stDataFrame"])
+  div[data-testid="stDataFrame"]
+  .dvn-scroller {
+  overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
 /* ── Download button row ────────────────────────────────────────────────────── */
 [data-testid="stDownloadButton"] button {
   border-radius: var(--bst-radius-sm) !important;
@@ -1910,61 +2659,119 @@ div:has(#bst-suggest-chips) ~ div [data-testid="baseButton-secondary"]:hover {
   box-shadow: var(--bst-shadow-sm) !important;
 }
 
-/* ── Mode toggle: "Analyze Excel" pill (marker #bst-mode-toggle-chat) ─────── */
-div:has(#bst-mode-toggle-chat) ~ div .stButton > button {
+/* ── Hub Excel mode chips (st-key-* beats global secondary / teal hover) ───── */
+.stApp [class*="st-key-hub_enter_excel"] .stButton > button,
+.stApp [class*="st-key-hub_enter_excel"] .stButton > button[kind="secondary"],
+.stApp [class*="st-key-hub_enter_excel"] [data-testid="baseButton-secondary"],
+.stApp [class*="st-key-hub_exit_excel"] .stButton > button,
+.stApp [class*="st-key-hub_exit_excel"] .stButton > button[kind="secondary"],
+.stApp [class*="st-key-hub_exit_excel"] [data-testid="baseButton-secondary"] {
   border-radius: var(--bst-radius-pill) !important;
-  padding: 0.4rem 1.15rem !important;
-  font-size: 0.83rem !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  background: linear-gradient(
+    180deg,
+    var(--bst-excel-chip-bg-top) 0%,
+    var(--bst-excel-chip-bg-bottom) 100%
+  ) !important;
+  background-color: var(--bst-excel-chip-bg-bottom) !important;
+  border: 1px solid var(--bst-excel-chip-border) !important;
+  color: var(--bst-excel-chip-ink) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset, var(--bst-excel-chip-shadow) !important;
+  transition: background var(--bst-transition), background-color var(--bst-transition),
+    color var(--bst-transition), border-color var(--bst-transition),
+    box-shadow var(--bst-transition) !important;
+}
+
+.stApp [class*="st-key-hub_enter_excel"] .stButton > button,
+.stApp [class*="st-key-hub_enter_excel"] [data-testid="baseButton-secondary"] {
+  padding: 0.26rem 0.78rem !important;
+  font-size: 0.76rem !important;
+  letter-spacing: 0.01em !important;
   height: auto !important;
   min-height: 0 !important;
-  background: var(--bst-surface-elevated) !important;
-  border: 1px solid var(--bst-border-strong) !important;
-  color: var(--bst-muted) !important;
-  box-shadow: var(--bst-shadow-xs) !important;
-  transition: background var(--bst-transition), color var(--bst-transition),
-    border-color var(--bst-transition), box-shadow var(--bst-transition) !important;
+  line-height: 1.35 !important;
+  transform: translateY(0) !important;
+  transition: background var(--bst-transition), background-color var(--bst-transition),
+    color var(--bst-transition), border-color var(--bst-transition),
+    box-shadow 0.18s ease, transform 0.18s ease !important;
 }
 
-div:has(#bst-mode-toggle-chat) ~ div .stButton > button:hover {
-  background: var(--bst-surface-2) !important;
-  border-color: var(--bst-muted-2) !important;
-  color: var(--bst-ink) !important;
-  box-shadow: var(--bst-shadow-sm) !important;
-}
-
-/* ── Mode toggle: Excel exit × (marker #bst-mode-toggle-excel) ────────────── */
-div:has(#bst-mode-toggle-excel) ~ div .stButton > button {
+.stApp [class*="st-key-hub_exit_excel"] .stButton > button,
+.stApp [class*="st-key-hub_exit_excel"] [data-testid="baseButton-secondary"] {
   width: 2.4rem !important;
   height: 2.4rem !important;
   min-height: 2.4rem !important;
   padding: 0 !important;
-  border-radius: var(--bst-radius-pill) !important;
-  background: var(--bst-surface-elevated) !important;
-  border: 1px solid var(--bst-border-strong) !important;
-  box-shadow: var(--bst-shadow-xs) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   font-size: 1.15rem !important;
-  font-weight: 500 !important;
   line-height: 1 !important;
-  color: var(--bst-muted) !important;
-  transition: background var(--bst-transition), border-color var(--bst-transition),
-    color var(--bst-transition), box-shadow var(--bst-transition) !important;
 }
 
-div:has(#bst-mode-toggle-excel) ~ div .stButton > button p {
-  font-size: 1.15rem !important;
-  line-height: 1 !important;
+.stApp [class*="st-key-hub_enter_excel"] .stButton > button p,
+.stApp [class*="st-key-hub_enter_excel"] .stButton > button span,
+.stApp [class*="st-key-hub_exit_excel"] .stButton > button p,
+.stApp [class*="st-key-hub_exit_excel"] .stButton > button span {
+  color: inherit !important;
   margin: 0 !important;
 }
 
-div:has(#bst-mode-toggle-excel) ~ div .stButton > button:hover {
-  background: var(--bst-accent-soft) !important;
-  border-color: var(--bst-accent) !important;
-  color: var(--bst-ink) !important;
-  box-shadow: var(--bst-shadow-sm) !important;
+.stApp [class*="st-key-hub_enter_excel"] .stButton > button p,
+.stApp [class*="st-key-hub_enter_excel"] .stButton > button span {
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+.stApp [class*="st-key-hub_exit_excel"] .stButton > button p,
+.stApp [class*="st-key-hub_exit_excel"] .stButton > button span {
+  font-size: 1.15rem !important;
+  line-height: 1 !important;
+}
+
+html[data-theme="dark"]
+  .stApp
+  [class*="st-key-hub_enter_excel"]
+  .stButton
+  > button,
+html[data-theme="dark"]
+  .stApp
+  [class*="st-key-hub_enter_excel"]
+  [data-testid="baseButton-secondary"],
+html[data-theme="dark"]
+  .stApp
+  [class*="st-key-hub_exit_excel"]
+  .stButton
+  > button,
+html[data-theme="dark"]
+  .stApp
+  [class*="st-key-hub_exit_excel"]
+  [data-testid="baseButton-secondary"] {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, var(--bst-excel-chip-shadow) !important;
+}
+
+.stApp [class*="st-key-hub_enter_excel"] .stButton > button:hover,
+.stApp [class*="st-key-hub_enter_excel"] .stButton > button[kind="secondary"]:hover,
+.stApp [class*="st-key-hub_enter_excel"] [data-testid="baseButton-secondary"]:hover {
+  background: var(--bst-excel-chip-hover-bg) !important;
+  background-color: var(--bst-excel-chip-hover-bg) !important;
+  border-color: var(--bst-excel-chip-hover-border) !important;
+  color: var(--bst-excel-chip-hover-ink) !important;
+  transform: translateY(var(--bst-excel-chip-lift)) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset, var(--bst-excel-chip-shadow-hover),
+    var(--bst-excel-chip-lift-shadow) !important;
+  filter: none !important;
+}
+
+.stApp [class*="st-key-hub_exit_excel"] .stButton > button:hover,
+.stApp [class*="st-key-hub_exit_excel"] .stButton > button[kind="secondary"]:hover,
+.stApp [class*="st-key-hub_exit_excel"] [data-testid="baseButton-secondary"]:hover {
+  background: var(--bst-excel-chip-hover-bg) !important;
+  background-color: var(--bst-excel-chip-hover-bg) !important;
+  border-color: var(--bst-excel-chip-hover-border) !important;
+  color: var(--bst-excel-chip-hover-ink) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset, var(--bst-excel-chip-shadow-hover) !important;
+  filter: none !important;
 }
 
 /* ── Focus visible (keyboard) — hub chat input excluded ─────────────────────── */
