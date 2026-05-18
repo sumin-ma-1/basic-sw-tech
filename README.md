@@ -4,9 +4,7 @@ Welcome to our basic software technology!
 
 Streamlit web UI to chat with **Ollama**, **upload/list/delete** CSV and Excel files, and **merge** multiple tables by key columns (**numeric columns averaged**, others use **first** value). Export conversations as Markdown or save them under `outputs/`.
 
-## Demo
-
-Usage screen recording.
+## Usage screen recording
 
 <img width="1392" height="1080" alt="Usage demo — hub chat, Analyze Excel, and file merge" src="https://github.com/user-attachments/assets/3488e184-d82c-4c9e-867e-41f2905ff95f" />
 
