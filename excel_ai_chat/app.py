@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import json
 import re
 import shutil
 from contextlib import contextmanager
@@ -13,7 +14,22 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
+from excel_ai_chat.chat_store import (
+    clear_last_active_id,
+    create_conversation_id,
+    delete_conversation,
+    get_last_active_id,
+    load_conversation,
+    list_conversations,
+    rename_conversation,
+    save_conversation,
+)
 from excel_ai_chat.excel_tools import merge_mean_by_keys, read_table
+from excel_ai_chat.history_ui import (
+    history_widget_key,
+    render_history_row,
+    sidebar_history_row_bind,
+)
 from excel_ai_chat.ollama_client import chat, list_models
 from excel_ai_chat.paths import default_ollama_base, outputs_dir, uploads_dir
 from excel_ai_chat.theme import inject_hub_theme
@@ -29,11 +45,16 @@ MODE_EXCEL = "excel"
 CHAT_COMPOSER_KEY = "hub_composer"
 
 BST_INSTALLED_MODEL_PICK_KEY = "bst_installed_model_pick"
+_ACTIVE_CHAT_ID_CHAT = "active_chat_id_chat"
+_ACTIVE_CHAT_ID_EXCEL = "active_excel_chat_id"
 
 # Drain chat_input into messages before the thread renders (avoids default Streamlit chat
 # chrome before messages are inside the themed thread; hub bubble CSS keys off #bst-hub-chat-styling-root).
 _BST_PENDING_CHAT_GEN = "_bst_pending_chat_gen"
 _BST_PENDING_EXCEL_GEN = "_bst_pending_excel_gen"
+_BST_HISTORY_RENAME_ID = "_bst_history_rename_chat_id"
+_BST_HISTORY_CLIPBOARD = "_bst_history_clipboard_text"
+_BST_HISTORY_NOTICE = "_bst_history_notice"
 
 # Not in Streamlit PresetNames → avatar=None yields no icon (see chat._process_avatar_input).
 _HUB_CHAT_USER_DISPLAY_NAME = "You"
@@ -313,7 +334,7 @@ def _purge_hub_widget_keys() -> None:
 
 
 def _restore_main_hub() -> None:
-    """Excel exit → identical to first-load main hub (chat home)."""
+    """Excel exit → chat home; keep chat history id, reset excel session uploads."""
     st.session_state.hub_mode = MODE_CHAT
     st.session_state.excel_ai_files = {}
     st.session_state.excel_ai_upload_sig = None
@@ -322,11 +343,13 @@ def _restore_main_hub() -> None:
     st.session_state.excel_ai_input_counter = 0
     st.session_state.chat_input_counter = 0
     _purge_hub_widget_keys()
+    _ensure_chat_session(MODE_CHAT)
 
 
 def _enter_excel_mode() -> None:
     st.session_state.hub_mode = MODE_EXCEL
     _purge_hub_widget_keys()
+    _ensure_chat_session(MODE_EXCEL)
 
 
 def _init_state() -> None:
@@ -342,10 +365,265 @@ def _init_state() -> None:
         "excel_ai_input_counter": 0,
         "excel_ai_chip_text":     "",
         "model_name":             "llama3.2",
+        _ACTIVE_CHAT_ID_CHAT:     None,
+        _ACTIVE_CHAT_ID_EXCEL:    None,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+
+
+# ── Chat history (outputs/chats/*.json) ───────────────────────────────────────
+
+def _active_chat_id_key(mode: str) -> str:
+    return _ACTIVE_CHAT_ID_CHAT if mode == MODE_CHAT else _ACTIVE_CHAT_ID_EXCEL
+
+
+def _messages_state_key(mode: str) -> str:
+    return "messages" if mode == MODE_CHAT else "excel_ai_messages"
+
+
+def _get_active_chat_id(mode: str) -> str | None:
+    val = st.session_state.get(_active_chat_id_key(mode))
+    return val if isinstance(val, str) and val else None
+
+
+def _set_active_chat_id(mode: str, chat_id: str | None) -> None:
+    st.session_state[_active_chat_id_key(mode)] = chat_id
+
+
+def _ensure_active_chat_id(mode: str) -> str:
+    chat_id = _get_active_chat_id(mode)
+    if chat_id and load_conversation(chat_id):
+        return chat_id
+    new_id = create_conversation_id()
+    _set_active_chat_id(mode, new_id)
+    return new_id
+
+
+def _ensure_chat_session(mode: str) -> None:
+    """Load the active conversation from disk when the in-memory thread is empty."""
+    msg_key = _messages_state_key(mode)
+    if st.session_state.get(msg_key):
+        return
+    chat_id = _get_active_chat_id(mode)
+    if not chat_id:
+        chat_id = get_last_active_id(mode)
+        if chat_id:
+            _set_active_chat_id(mode, chat_id)
+    if not chat_id:
+        return
+    data = load_conversation(chat_id)
+    if not data or data.get("mode") != mode:
+        return
+    st.session_state[msg_key] = [
+        {"role": str(m["role"]), "content": str(m["content"])}
+        for m in data.get("messages", [])
+        if isinstance(m, dict) and m.get("role") in ("user", "assistant")
+    ]
+
+
+def _persist_current_chat(mode: str, model: str, temperature: float) -> None:
+    msg_key = _messages_state_key(mode)
+    messages: list[dict[str, Any]] = st.session_state.get(msg_key) or []
+    if not messages:
+        return
+    chat_id = _ensure_active_chat_id(mode)
+    excel_names = sorted(_excel_files().keys()) if mode == MODE_EXCEL else None
+    save_conversation(
+        chat_id,
+        mode=mode,
+        messages=messages,
+        model=model,
+        temperature=temperature,
+        excel_file_names=excel_names,
+    )
+
+
+def _start_new_chat(mode: str) -> None:
+    st.session_state[_messages_state_key(mode)] = []
+    _set_active_chat_id(mode, None)
+    clear_last_active_id(mode)
+    st.session_state.nav_page = NAV_HUB
+    if mode == MODE_EXCEL:
+        st.session_state.excel_ai_files = {}
+        st.session_state.excel_ai_upload_sig = None
+        st.session_state.excel_ai_input_counter += 1
+    else:
+        st.session_state.chat_input_counter += 1
+    _purge_hub_widget_keys()
+
+
+def _load_chat_into_session(mode: str, chat_id: str) -> None:
+    data = load_conversation(chat_id)
+    if not data or data.get("mode") != mode:
+        return
+    st.session_state.nav_page = NAV_HUB
+    st.session_state[_messages_state_key(mode)] = [
+        {"role": str(m["role"]), "content": str(m["content"])}
+        for m in data.get("messages", [])
+        if isinstance(m, dict) and m.get("role") in ("user", "assistant")
+    ]
+    _set_active_chat_id(mode, chat_id)
+    if mode == MODE_EXCEL:
+        st.session_state.excel_ai_files = {}
+        st.session_state.excel_ai_upload_sig = None
+        st.session_state.excel_ai_input_counter += 1
+    else:
+        st.session_state.chat_input_counter += 1
+    _purge_hub_widget_keys()
+
+
+def _on_sidebar_new_chat(mode: str) -> None:
+    _start_new_chat(mode)
+
+
+def _on_sidebar_open_chat(mode: str, chat_id: str) -> None:
+    if chat_id != _get_active_chat_id(mode):
+        _load_chat_into_session(mode, chat_id)
+
+
+def _on_sidebar_delete_chat(mode: str, chat_id: str) -> None:
+    delete_conversation(chat_id)
+    if chat_id == _get_active_chat_id(mode):
+        _start_new_chat(mode)
+
+
+def _conversation_share_text(chat_id: str) -> str:
+    data = load_conversation(chat_id)
+    if not data:
+        return ""
+    title = str(data.get("title") or "New chat")
+    lines = [title, ""]
+    for m in data.get("messages") or []:
+        if not isinstance(m, dict):
+            continue
+        role = str(m.get("role") or "").strip()
+        if role not in ("user", "assistant"):
+            continue
+        label = "You" if role == "user" else "Assistant"
+        body = str(m.get("content") or "").strip()
+        if body:
+            lines.append(f"{label}:\n{body}\n")
+    return "\n".join(lines).strip()
+
+
+def _on_hist_menu_share(_mode: str, chat_id: str) -> None:
+    text = _conversation_share_text(chat_id)
+    if text:
+        st.session_state[_BST_HISTORY_CLIPBOARD] = text
+        st.session_state[_BST_HISTORY_NOTICE] = "Conversation copied to clipboard."
+
+
+def _on_hist_menu_rename(_mode: str, chat_id: str) -> None:
+    st.session_state[_BST_HISTORY_RENAME_ID] = chat_id
+
+
+def _flush_history_clipboard(text: str) -> None:
+    payload = json.dumps(text)
+    components.html(
+        f"<script>(function(){{"
+        f"const t={payload};"
+        f"const d=window.parent.document;"
+        f"try{{navigator.clipboard.writeText(t);}}catch(e){{"
+        f"const ta=d.createElement('textarea');ta.value=t;"
+        f"ta.style.cssText='position:fixed;left:-9999px;';"
+        f"d.body.appendChild(ta);ta.select();"
+        f"try{{d.execCommand('copy');}}catch(err){{}}"
+        f"d.body.removeChild(ta);"
+        f"}}"
+        f"}})();</script>",
+        height=0,
+    )
+
+
+def _render_history_rename_panel(mode: str) -> None:
+    rename_id = st.session_state.get(_BST_HISTORY_RENAME_ID)
+    if not isinstance(rename_id, str) or not rename_id:
+        return
+    data = load_conversation(rename_id)
+    if not data or data.get("mode") != mode:
+        st.session_state.pop(_BST_HISTORY_RENAME_ID, None)
+        return
+    wkey = history_widget_key(rename_id)
+    current = str(data.get("title") or "New chat")
+    with st.form(f"history_rename_{mode}_{wkey}"):
+        st.markdown("**Rename conversation**")
+        new_title = st.text_input("Name", value=current, label_visibility="collapsed")
+        save_col, cancel_col = st.columns(2)
+        with save_col:
+            submitted = st.form_submit_button("Save", use_container_width=True)
+        with cancel_col:
+            cancelled = st.form_submit_button("Cancel", use_container_width=True)
+    if cancelled:
+        st.session_state.pop(_BST_HISTORY_RENAME_ID, None)
+        st.rerun()
+    if submitted:
+        rename_conversation(rename_id, new_title)
+        st.session_state.pop(_BST_HISTORY_RENAME_ID, None)
+        st.session_state[_BST_HISTORY_NOTICE] = "Conversation renamed."
+        st.rerun()
+
+
+def _render_sidebar_chat_history() -> None:
+    if st.session_state.nav_page != NAV_HUB:
+        return
+    mode = st.session_state.hub_mode
+    active_id = _get_active_chat_id(mode)
+
+    notice = st.session_state.pop(_BST_HISTORY_NOTICE, None)
+    if notice:
+        st.caption(str(notice))
+    clipboard = st.session_state.pop(_BST_HISTORY_CLIPBOARD, None)
+    if clipboard:
+        _flush_history_clipboard(clipboard)
+
+    st.markdown(
+        '<p class="bst-sidebar-fm-kicker bst-sidebar-history-kicker">Chat history</p>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<span id="bst-sidebar-history-root" class="bst-sidebar-history-anchor" '
+        'aria-hidden="true"></span>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<span class="bst-sidebar-new-chat-anchor" aria-hidden="true"></span>',
+        unsafe_allow_html=True,
+    )
+    st.button(
+        "New chat",
+        key=f"sidebar_new_chat_{mode}",
+        type="secondary",
+        on_click=_on_sidebar_new_chat,
+        args=(mode,),
+    )
+
+    _render_history_rename_panel(mode)
+
+    convos = list_conversations(mode=mode)
+    if not convos:
+        st.markdown(
+            '<p class="bst-sidebar-archive-empty">No saved conversations yet.</p>',
+            unsafe_allow_html=True,
+        )
+        return
+
+    st.markdown('<div class="bst-sidebar-archive" role="list">', unsafe_allow_html=True)
+    for row in convos:
+        cid = str(row["id"])
+        render_history_row(
+            mode=mode,
+            chat_id=cid,
+            title=str(row.get("title") or "New chat"),
+            is_active=cid == active_id,
+            on_open=_on_sidebar_open_chat,
+            on_share=_on_hist_menu_share,
+            on_rename=_on_hist_menu_rename,
+            on_delete=_on_sidebar_delete_chat,
+        )
+    st.markdown("</div>", unsafe_allow_html=True)
+    sidebar_history_row_bind()
 
 
 def _on_installed_model_pick_change() -> None:
@@ -409,6 +687,7 @@ def _process_uploads(uploaded: Any) -> None:
     st.session_state.excel_ai_upload_sig = sig
     if set(files) != prev_names:
         st.session_state.excel_ai_messages = []
+        _set_active_chat_id(MODE_EXCEL, None)
         st.session_state.excel_ai_input_counter += 1
 
 
@@ -550,7 +829,9 @@ def _hub_drain_pending_chat_submit(model: str, temperature: float) -> None:
     if not isinstance(val, str) or not val.strip():
         return
     text = val.strip()
+    _ensure_active_chat_id(MODE_CHAT)
     st.session_state.messages.append({"role": "user", "content": text})
+    _persist_current_chat(MODE_CHAT, model, temperature)
     st.session_state[_BST_PENDING_CHAT_GEN] = (model, temperature)
     st.session_state.chat_input_counter += 1
 
@@ -578,6 +859,7 @@ def _hub_complete_pending_chat_generation(model: str, temperature: float) -> Non
         _hub_message_body_markdown(reply, role="assistant")
 
     st.session_state.messages.append({"role": "assistant", "content": reply})
+    _persist_current_chat(MODE_CHAT, model, temperature)
     st.rerun()
 
 
@@ -634,6 +916,7 @@ def _hub_complete_pending_excel_generation(model: str, temperature: float) -> No
         _hub_message_body_markdown(reply, role="assistant")
 
     st.session_state.excel_ai_messages.append({"role": "assistant", "content": reply})
+    _persist_current_chat(MODE_EXCEL, model, temperature)
     st.rerun()
 
 
@@ -711,13 +994,7 @@ def _render_hub_composer(mode: str, model: str, temperature: float) -> None:
                 key="hub_clear_chat" if mode == MODE_CHAT else "hub_clear_excel",
                 use_container_width=True,
             ):
-                if mode == MODE_CHAT:
-                    st.session_state.messages = []
-                    st.session_state.chat_input_counter += 1
-                else:
-                    st.session_state.excel_ai_messages = []
-                    st.session_state.excel_ai_input_counter += 1
-                _purge_hub_widget_keys()
+                _start_new_chat(mode)
                 st.rerun()
 
     st.markdown(
@@ -732,7 +1009,9 @@ def _render_hub_composer(mode: str, model: str, temperature: float) -> None:
     if mode == MODE_CHAT:
         msgs = st.session_state.messages
         if not msgs or msgs[-1]["role"] != "user" or msgs[-1]["content"] != text:
+            _ensure_active_chat_id(MODE_CHAT)
             st.session_state.messages.append({"role": "user", "content": text})
+            _persist_current_chat(MODE_CHAT, model, temperature)
             st.session_state[_BST_PENDING_CHAT_GEN] = (model, temperature)
             st.session_state.chat_input_counter += 1
             st.rerun()
@@ -748,7 +1027,9 @@ def _render_hub_composer(mode: str, model: str, temperature: float) -> None:
         and msgs[-1]["content"] == text
         and not msgs[-1].get("_hidden")
     ):
+        _ensure_active_chat_id(MODE_EXCEL)
         st.session_state.excel_ai_messages.append({"role": "user", "content": text})
+        _persist_current_chat(MODE_EXCEL, model, temperature)
     st.session_state[_BST_PENDING_EXCEL_GEN] = (model, temperature)
     st.session_state.excel_ai_input_counter += 1
     st.rerun()
@@ -796,6 +1077,7 @@ def _render_mode_toggle(mode: str) -> None:
 
 def _render_hub(model: str, temperature: float) -> None:
     mode = st.session_state.hub_mode
+    _ensure_chat_session(mode)
 
     st.markdown('<span id="bst-hub-page"></span>', unsafe_allow_html=True)
 
@@ -1657,6 +1939,10 @@ def main() -> None:
 
         st.divider()
         _render_sidebar_file_manager_nav()
+
+        st.divider()
+
+        _render_sidebar_chat_history()
 
         st.divider()
         st.caption("Favicon attribution")

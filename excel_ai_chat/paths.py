@@ -26,5 +26,12 @@ def outputs_dir() -> Path:
     return p
 
 
+def chats_dir() -> Path:
+    """Saved hub conversations (JSON)."""
+    p = outputs_dir() / "chats"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
 def default_ollama_base() -> str:
     return os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")

@@ -6,7 +6,7 @@ Streamlit web UI to chat with **Ollama**, **upload/list/delete** CSV and Excel f
 
 ## Demo
 
-Usage screen recording (GIF).
+Usage screen recording.
 
 <img width="1392" height="1080" alt="Usage demo — hub chat, Analyze Excel, and file merge" src="https://github.com/user-attachments/assets/3488e184-d82c-4c9e-867e-41f2905ff95f" />
 
@@ -77,6 +77,7 @@ The app opens on a **hub**: choose **Excel World** for chat, file uploads, and m
 
 | Path | Description |
 |------|-------------|
+| `outputs/chats/` | Saved hub conversations (JSON; gitignored via `outputs/`) |
 | `excel_ai_chat/` | Package source (`app.py`, Ollama client, Excel helpers, `theme.py`) |
 | `excel_ai_chat/static/css/` | Hub UI styles (`hub_theme.css`, `waiting.css`), loaded by `theme.py` |
 | `uploads/` | Uploaded files (gitignored) |

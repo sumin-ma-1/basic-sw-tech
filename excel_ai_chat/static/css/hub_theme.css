@@ -53,6 +53,23 @@
   --bst-excel-chip-shadow-hover: 0 2px 8px rgba(13, 148, 136, 0.22);
   --bst-excel-chip-lift: -2px;
   --bst-excel-chip-lift-shadow: 0 4px 14px rgba(13, 148, 136, 0.24);
+
+  /* Sidebar “New chat” pill — soft slate (distinct from teal Excel chips) */
+  --bst-new-chat-pill-bg: #f1f5f9;
+  --bst-new-chat-pill-border: #cbd5e1;
+  --bst-new-chat-pill-ink: #475569;
+  --bst-new-chat-pill-hover-bg: #e2e8f0;
+  --bst-new-chat-pill-hover-border: #94a3b8;
+  --bst-new-chat-pill-hover-ink: #334155;
+  --bst-new-chat-pill-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --bst-new-chat-pill-hover-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+
+  /* Sidebar history row (ghost item button) */
+  --bst-hist-item-bg: transparent;
+  --bst-hist-item-hover: rgba(15, 23, 42, 0.06);
+  --bst-hist-item-active: rgba(15, 23, 42, 0.12);
+  --bst-hist-item-active-hover: rgba(15, 23, 42, 0.15);
+  --bst-hist-item-pressed: rgba(15, 23, 42, 0.14);
 }
 
 /* Streamlit dark theme (set on <html> when dark mode is on) */
@@ -93,6 +110,21 @@ html[data-theme="dark"] {
   --bst-excel-chip-hover-ink: #ccfbf1;
   --bst-excel-chip-shadow: 0 1px 4px rgba(13, 148, 136, 0.28);
   --bst-excel-chip-shadow-hover: 0 2px 10px rgba(13, 148, 136, 0.35);
+
+  --bst-new-chat-pill-bg: #334155;
+  --bst-new-chat-pill-border: #475569;
+  --bst-new-chat-pill-ink: #e2e8f0;
+  --bst-new-chat-pill-hover-bg: #475569;
+  --bst-new-chat-pill-hover-border: #64748b;
+  --bst-new-chat-pill-hover-ink: #f8fafc;
+  --bst-new-chat-pill-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --bst-new-chat-pill-hover-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+
+  --bst-hist-item-bg: transparent;
+  --bst-hist-item-hover: rgba(255, 255, 255, 0.06);
+  --bst-hist-item-active: rgba(255, 255, 255, 0.12);
+  --bst-hist-item-active-hover: rgba(255, 255, 255, 0.16);
+  --bst-hist-item-pressed: rgba(255, 255, 255, 0.15);
 }
 
 /* ── App shell ─────────────────────────────────────────────────────────────── */
@@ -269,6 +301,495 @@ section[data-testid="stSidebar"]
   color: var(--bst-muted-2) !important;
   text-align: center !important;
   line-height: 1.35 !important;
+}
+
+/* ── Sidebar: chat history archive ─────────────────────────────────────────── */
+section[data-testid="stSidebar"] .bst-sidebar-history-kicker {
+  margin-top: 0.1rem;
+  margin-bottom: 0.35rem !important;
+}
+
+section[data-testid="stSidebar"] .bst-sidebar-new-chat-anchor {
+  display: block;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"] {
+  margin: 0 0 0.1rem !important;
+  padding: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="stVerticalBlock"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="stElementContainer"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="stVerticalBlockBorderWrapper"] {
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="baseButton-secondary"] {
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0.22rem 0.62rem !important;
+  margin: 0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  font-size: 0.72rem !important;
+  font-weight: 400 !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0.01em;
+  border-radius: var(--bst-radius-pill) !important;
+  border: 1px solid var(--bst-new-chat-pill-border) !important;
+  background: var(--bst-new-chat-pill-bg) !important;
+  background-color: var(--bst-new-chat-pill-bg) !important;
+  color: var(--bst-new-chat-pill-ink) !important;
+  box-shadow: var(--bst-new-chat-pill-shadow) !important;
+  text-decoration: none !important;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.15s ease !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton
+  > button
+  p,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton
+  > button
+  span {
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  margin: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton
+  > button:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="baseButton-secondary"]:hover {
+  background: var(--bst-new-chat-pill-hover-bg) !important;
+  background-color: var(--bst-new-chat-pill-hover-bg) !important;
+  border-color: var(--bst-new-chat-pill-hover-border) !important;
+  color: var(--bst-new-chat-pill-hover-ink) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--bst-new-chat-pill-hover-shadow) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton
+  > button:active,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="baseButton-secondary"]:active {
+  transform: translateY(0) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor) .bst-sidebar-archive-empty {
+  margin: 0 0 0.2rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--bst-muted-2);
+  text-align: center;
+  border: 1px dashed var(--bst-border);
+  border-radius: var(--bst-radius-md);
+  background: var(--bst-surface);
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor) .bst-sidebar-archive {
+  display: block;
+  margin: 0;
+}
+
+/* History item component (keys: bst_hist_item_*, bst_hist_menu_*) */
+section[data-testid="stSidebar"] .bst-hist-item-anchor {
+  display: block;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Row container (st.container key bst_hist_row_*) — hover via .bst-hist-row-hover JS */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"] {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  transition: background 0.12s ease !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover {
+  background: var(--bst-hist-item-hover) !important;
+  /* Highlight extends a bit past the ⋯ control */
+  padding-right: 0.65rem !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-active,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:has(.bst-hist-item-anchor.is-active),
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-active {
+  background: var(--bst-hist-item-active) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-active.bst-hist-row-hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:has(.bst-hist-item-anchor.is-active):hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-active.bst-hist-row-hover {
+  background: var(--bst-hist-item-active-hover) !important;
+  padding-right: 0.65rem !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="stElementContainer"] {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="stHorizontalBlock"] {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  width: 100% !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="column"] {
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Title column — shrink to label width (⋯ sits right after text) */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="column"]:has([class*="st-key-bst_hist_item_"]) {
+  flex: 0 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: calc(100% - 0.5rem) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"] {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  [data-testid="baseButton-secondary"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  [data-testid="baseButton-tertiary"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0.26rem 0.2rem 0.26rem 0.45rem !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 0.8125rem !important;
+  font-weight: 450 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  color: var(--bst-ink) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transition: color 0.12s ease !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:has(.bst-hist-item-anchor.is-active)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:has(.bst-hist-item-anchor.is-active)
+  [class*="st-key-bst_hist_item_"]
+  [data-testid="baseButton-secondary"] {
+  font-weight: 500 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button
+  p,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button
+  span {
+  display: block !important;
+  width: auto !important;
+  max-width: 100% !important;
+  text-align: left !important;
+  color: inherit !important;
+  margin: 0 !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  [data-testid="baseButton-secondary"]:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--bst-ink) !important;
+}
+
+/* ⋯ menu — hidden until row hover (.bst-hist-row-hover) or focus */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:not(.bst-hist-row-hover):not(:focus-within)
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]),
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-sidebar-archive
+  [data-testid="stVerticalBlockBorderWrapper"]:not(.bst-hist-row-hover):not(:focus-within)
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]) {
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:not(.bst-hist-row-hover):not(:focus-within)
+  [class*="st-key-bst_hist_menu_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-sidebar-archive
+  [data-testid="stVerticalBlockBorderWrapper"]:not(.bst-hist-row-hover):not(:focus-within)
+  [class*="st-key-bst_hist_menu_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:not(.bst-hist-row-hover):not(:focus-within)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-sidebar-archive
+  [data-testid="stVerticalBlockBorderWrapper"]:not(.bst-hist-row-hover):not(:focus-within)
+  [data-testid="stPopoverButton"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]),
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:focus-within
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]),
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]),
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover:focus-within
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]) {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin-left: -0.32rem !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover
+  [class*="st-key-bst_hist_menu_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:focus-within
+  [class*="st-key-bst_hist_menu_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover
+  [class*="st-key-bst_hist_menu_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover:focus-within
+  [class*="st-key-bst_hist_menu_"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Popover/expander — hide default dropdown chevron (keep ⋯ text only) */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stIconMaterial"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"]
+  [data-testid="stIconMaterial"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  details
+  summary
+  svg,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stExpanderToggleIcon"] {
+  display: none !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"] {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em;
+  line-height: 1 !important;
+  border: none !important;
+  border-radius: var(--bst-radius-sm) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--bst-muted-2) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover
+  [class*="st-key-bst_hist_menu_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  .stButton
+  > button:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"]:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--bst-ink) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_delete_"]
+  .stButton
+  > button:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_delete_"]
+  [data-testid="baseButton-secondary"]:hover {
+  color: #b91c1c !important;
+  background: rgba(220, 38, 38, 0.1) !important;
+  border-color: rgba(220, 38, 38, 0.28) !important;
+}
+
+html[data-theme="dark"]
+  section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_delete_"]
+  .stButton
+  > button:hover,
+html[data-theme="dark"]
+  section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_delete_"]
+  [data-testid="baseButton-secondary"]:hover {
+  color: #f87171 !important;
+  background: rgba(248, 113, 113, 0.14) !important;
+  border-color: rgba(248, 113, 113, 0.35) !important;
 }
 
 /* ── Tagline ─────────────────────────────────────────────────────────────────── */
@@ -2078,6 +2599,35 @@ button[kind="secondary"] {
 button[kind="secondary"]:hover {
   border-color: var(--bst-accent) !important;
   color: var(--bst-accent) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="baseButton-secondary"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  .stButton
+  > button[kind="secondary"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="stPopoverButton"] {
+  border: none !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="baseButton-secondary"]:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  .stButton
+  > button[kind="secondary"]:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="stPopoverButton"]:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--bst-ink) !important;
 }
 
 /* ── Hub conversation bubbles (thread layout — chat UI lives only on hub) ──── */
