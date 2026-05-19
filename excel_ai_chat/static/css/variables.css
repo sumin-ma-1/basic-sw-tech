@@ -1,0 +1,128 @@
+/* =============================================================================
+   Hub + global polish — clean, modern UI (Streamlit-friendly, marker-scoped)
+   ============================================================================= */
+
+:root {
+  --bst-radius-sm: 10px;
+  --bst-radius-md: 14px;
+  --bst-radius-lg: 22px;
+  --bst-radius-pill: 999px;
+
+  --bst-muted: #64748b;
+  --bst-muted-2: #94a3b8;
+  --bst-border: #e2e8f0;
+  --bst-border-strong: #cbd5e1;
+  --bst-surface: #f8fafc;
+  --bst-surface-2: #f1f5f9;
+  --bst-surface-elevated: #ffffff;
+  --bst-ink: #0f172a;
+  --bst-accent: #0d9488;
+  --bst-accent-soft: rgba(13, 148, 136, 0.14);
+  --bst-primary: #0d9488;
+  --bst-primary-hover: #0f766e;
+  --bst-primary-ink: #ffffff;
+  --bst-radius-btn: 16px;
+
+  --bst-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --bst-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --bst-shadow-md: 0 4px 20px rgba(15, 23, 42, 0.07);
+
+  --bst-transition: 0.18s ease;
+
+  /* Hub conversation thread */
+  --bst-chat-thread-bg-top: rgba(241, 245, 249, 0.55);
+  --bst-chat-thread-bg-bottom: rgba(255, 255, 255, 0.92);
+  --bst-chat-thread-border: rgba(226, 232, 240, 0.95);
+  --bst-chat-assistant-bg: rgba(255, 255, 255, 0.95);
+  --bst-chat-assistant-border: rgba(226, 232, 240, 1);
+  --bst-chat-user-bg: rgba(13, 148, 136, 0.11);
+  --bst-chat-user-border: rgba(13, 148, 136, 0.28);
+  --bst-chat-bubble-shadow: 0 2px 14px rgba(15, 23, 42, 0.055);
+  /* Same horizontal cap for user + assistant (assistant slightly under old 70rem) */
+  --bst-hub-chat-bubble-max: min(96%, 66rem);
+
+  /* Hub Excel chip — teal-cyan (harmonizes with --bst-primary) */
+  --bst-excel-chip-bg-top: #f0fdfa;
+  --bst-excel-chip-bg-bottom: #ccfbf1;
+  --bst-excel-chip-border: #5eead4;
+  --bst-excel-chip-ink: #0f766e;
+  --bst-excel-chip-hover-bg: #99f6e4;
+  --bst-excel-chip-hover-border: #2dd4bf;
+  --bst-excel-chip-hover-ink: #115e59;
+  --bst-excel-chip-shadow: 0 1px 3px rgba(13, 148, 136, 0.14);
+  --bst-excel-chip-shadow-hover: 0 2px 8px rgba(13, 148, 136, 0.22);
+  --bst-excel-chip-lift: -2px;
+  --bst-excel-chip-lift-shadow: 0 4px 14px rgba(13, 148, 136, 0.24);
+
+  /* Sidebar “New chat” pill — soft slate (distinct from teal Excel chips) */
+  --bst-new-chat-pill-bg: #f1f5f9;
+  --bst-new-chat-pill-border: #cbd5e1;
+  --bst-new-chat-pill-ink: #475569;
+  --bst-new-chat-pill-hover-bg: #e2e8f0;
+  --bst-new-chat-pill-hover-border: #94a3b8;
+  --bst-new-chat-pill-hover-ink: #334155;
+  --bst-new-chat-pill-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --bst-new-chat-pill-hover-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+
+  /* Sidebar history row (ghost item button) */
+  --bst-hist-item-bg: transparent;
+  --bst-hist-item-hover: rgba(15, 23, 42, 0.06);
+  --bst-hist-item-active: rgba(15, 23, 42, 0.12);
+  --bst-hist-item-active-hover: rgba(15, 23, 42, 0.15);
+  --bst-hist-item-pressed: rgba(15, 23, 42, 0.14);
+}
+
+/* Streamlit dark theme (set on <html> when dark mode is on) */
+html[data-theme="dark"] {
+  --bst-muted: #94a3b8;
+  --bst-muted-2: #64748b;
+  --bst-border: #334155;
+  --bst-border-strong: #475569;
+  --bst-surface: #1e293b;
+  --bst-surface-2: #334155;
+  --bst-surface-elevated: #0f172a;
+  --bst-ink: #f1f5f9;
+  --bst-accent: #2dd4bf;
+  --bst-accent-soft: rgba(45, 212, 191, 0.18);
+  --bst-primary: #14b8a6;
+  --bst-primary-hover: #2dd4bf;
+  --bst-primary-ink: #042f2e;
+  --bst-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --bst-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --bst-shadow-md: 0 4px 24px rgba(0, 0, 0, 0.4);
+
+  --bst-chat-thread-bg-top: rgba(30, 41, 59, 0.45);
+  --bst-chat-thread-bg-bottom: rgba(15, 23, 42, 0.72);
+  --bst-chat-thread-border: rgba(51, 65, 85, 0.95);
+  --bst-chat-assistant-bg: rgba(30, 41, 59, 0.92);
+  --bst-chat-assistant-border: rgba(71, 85, 105, 0.95);
+  --bst-chat-user-bg: rgba(45, 212, 191, 0.1);
+  --bst-chat-user-border: rgba(45, 212, 191, 0.35);
+  --bst-chat-bubble-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
+  --bst-hub-chat-bubble-max: min(96%, 66rem);
+
+  --bst-excel-chip-bg-top: rgba(45, 212, 191, 0.16);
+  --bst-excel-chip-bg-bottom: rgba(13, 148, 136, 0.14);
+  --bst-excel-chip-border: rgba(45, 212, 191, 0.48);
+  --bst-excel-chip-ink: #5eead4;
+  --bst-excel-chip-hover-bg: rgba(45, 212, 191, 0.26);
+  --bst-excel-chip-hover-border: #2dd4bf;
+  --bst-excel-chip-hover-ink: #ccfbf1;
+  --bst-excel-chip-shadow: 0 1px 4px rgba(13, 148, 136, 0.28);
+  --bst-excel-chip-shadow-hover: 0 2px 10px rgba(13, 148, 136, 0.35);
+
+  --bst-new-chat-pill-bg: #334155;
+  --bst-new-chat-pill-border: #475569;
+  --bst-new-chat-pill-ink: #e2e8f0;
+  --bst-new-chat-pill-hover-bg: #475569;
+  --bst-new-chat-pill-hover-border: #64748b;
+  --bst-new-chat-pill-hover-ink: #f8fafc;
+  --bst-new-chat-pill-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --bst-new-chat-pill-hover-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+
+  --bst-hist-item-bg: transparent;
+  --bst-hist-item-hover: rgba(255, 255, 255, 0.06);
+  --bst-hist-item-active: rgba(255, 255, 255, 0.12);
+  --bst-hist-item-active-hover: rgba(255, 255, 255, 0.16);
+  --bst-hist-item-pressed: rgba(255, 255, 255, 0.15);
+}

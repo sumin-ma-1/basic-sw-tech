@@ -1,0 +1,273 @@
+/* global.css — 앱 전체 공통 스타일 (app shell, 버튼, 폼, 접근성) */
+/* ── App shell ─────────────────────────────────────────────────────────────── */
+.stApp {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Thin scrollbars (WebKit) */
+.stApp ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.stApp ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.stApp ::-webkit-scrollbar-thumb {
+  background: var(--bst-border-strong);
+  border-radius: var(--bst-radius-pill);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.stApp ::-webkit-scrollbar-thumb:hover {
+  background: var(--bst-muted-2);
+  background-clip: padding-box;
+}
+
+/* ── Main column ───────────────────────────────────────────────────────────── */
+section[data-testid="stMain"] > div {
+  padding-top: 0.75rem;
+  padding-bottom: 2rem;
+}
+
+section[data-testid="stMain"] h1,
+section[data-testid="stMain"] h2,
+section[data-testid="stMain"] h3 {
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  color: var(--bst-ink);
+}
+
+section[data-testid="stMain"] h1 {
+  text-align: center;
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+}
+
+/* Top run hint caption */
+section[data-testid="stMain"] [data-testid="stCaption"] {
+  color: var(--bst-muted) !important;
+  font-size: 0.78rem !important;
+  opacity: 0.92;
+}
+
+
+/* ── Textarea (sidebar / file manager) ─────────────────────────────────────── */
+div[data-testid="stTextArea"] textarea {
+  border-radius: var(--bst-radius-lg) !important;
+  padding: 15px 18px !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  resize: none !important;
+  border: 1px solid var(--bst-border-strong) !important;
+  background: var(--bst-surface-elevated) !important;
+  color: var(--bst-ink) !important;
+  box-shadow: var(--bst-shadow-sm) !important;
+  transition: border-color var(--bst-transition), box-shadow var(--bst-transition),
+    background var(--bst-transition) !important;
+}
+
+div[data-testid="stTextArea"] textarea::placeholder {
+  color: var(--bst-muted-2) !important;
+  opacity: 1 !important;
+}
+
+div[data-testid="stTextArea"] textarea:hover {
+  border-color: var(--bst-muted-2) !important;
+}
+
+div[data-testid="stTextArea"] textarea:focus {
+  border-color: var(--bst-accent) !important;
+  box-shadow: 0 0 0 3px var(--bst-accent-soft), var(--bst-shadow-sm) !important;
+  outline: none !important;
+}
+
+div[data-testid="stTextArea"] label {
+  display: none !important;
+}
+
+div[data-testid="stTextArea"],
+div[data-testid="stTextArea"] > div,
+div[data-testid="stTextArea"] [data-testid="stVerticalBlockBorderWrapper"],
+div[data-testid="stTextArea"] .stTextArea {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* ── Buttons (rounded, teal accent — not Streamlit red) ──────────────────── */
+.stApp .stButton > button,
+.stApp [data-testid="stDownloadButton"] > button,
+[data-testid="baseButton-primary"],
+[data-testid="baseButton-secondary"],
+button[kind="primary"],
+button[kind="secondary"] {
+  border-radius: var(--bst-radius-btn) !important;
+  transition: transform 0.12s ease, box-shadow var(--bst-transition),
+    background var(--bst-transition), border-color var(--bst-transition),
+    color var(--bst-transition) !important;
+}
+
+.stApp .stButton > button[kind="primary"],
+.stApp [data-testid="stDownloadButton"] > button[kind="primary"],
+[data-testid="baseButton-primary"],
+button[kind="primary"] {
+  background-color: var(--bst-primary) !important;
+  border: 1px solid var(--bst-primary) !important;
+  color: var(--bst-primary-ink) !important;
+  border-radius: var(--bst-radius-btn) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  box-shadow: var(--bst-shadow-xs) !important;
+  transition: transform 0.12s ease, box-shadow var(--bst-transition), filter var(--bst-transition) !important;
+}
+
+.stApp .stButton > button[kind="primary"]:hover,
+.stApp [data-testid="stDownloadButton"] > button[kind="primary"]:hover,
+[data-testid="baseButton-primary"]:hover,
+button[kind="primary"]:hover {
+  background-color: var(--bst-primary-hover) !important;
+  border-color: var(--bst-primary-hover) !important;
+  box-shadow: var(--bst-shadow-sm) !important;
+  filter: none !important;
+}
+
+.stApp .stButton > button[kind="primary"]:active,
+[data-testid="baseButton-primary"]:active,
+button[kind="primary"]:active {
+  transform: translateY(1px);
+}
+
+.stApp .stButton > button[kind="secondary"],
+[data-testid="baseButton-secondary"],
+button[kind="secondary"] {
+  font-weight: 500 !important;
+  border: 1px solid var(--bst-border-strong) !important;
+}
+
+.stApp .stButton > button[kind="secondary"]:hover,
+[data-testid="baseButton-secondary"]:hover,
+button[kind="secondary"]:hover {
+  border-color: var(--bst-accent) !important;
+  color: var(--bst-accent) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="baseButton-secondary"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  .stButton
+  > button[kind="secondary"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="stPopoverButton"] {
+  border: none !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="baseButton-secondary"]:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  .stButton
+  > button[kind="secondary"]:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="stPopoverButton"]:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--bst-ink) !important;
+}
+
+/* ── Alerts & info ─────────────────────────────────────────────────────────── */
+div[data-testid="stAlert"] {
+  border-radius: var(--bst-radius-md) !important;
+  border: 1px solid var(--bst-border) !important;
+  box-shadow: var(--bst-shadow-xs) !important;
+}
+
+/* ── Expanders ──────────────────────────────────────────────────────────────── */
+.streamlit-expanderHeader {
+  border-radius: var(--bst-radius-sm) !important;
+  font-weight: 500 !important;
+}
+
+/* ── File uploader ─────────────────────────────────────────────────────────── */
+[data-testid="stFileUploader"] section {
+  border-radius: var(--bst-radius-md) !important;
+  border: 1px dashed var(--bst-border-strong) !important;
+  background: var(--bst-surface) !important;
+  transition: border-color var(--bst-transition), background var(--bst-transition) !important;
+}
+
+[data-testid="stFileUploader"]:hover section {
+  border-color: var(--bst-muted-2) !important;
+  background: var(--bst-surface-2) !important;
+}
+
+/* ── Tabs (global fallback) ────────────────────────────────────────────────── */
+[data-testid="stTabs"] [role="tab"],
+[data-testid="stTabs"] [data-baseweb="tab"] {
+  font-weight: 500 !important;
+  letter-spacing: -0.01em;
+}
+
+
+/* ── Dataframes ─────────────────────────────────────────────────────────────── */
+div[data-testid="stDataFrame"] {
+  border-radius: var(--bst-radius-md) !important;
+  overflow: hidden;
+  border: 1px solid var(--bst-border) !important;
+  box-shadow: var(--bst-shadow-xs);
+}
+
+/* Preview tables — allow horizontal scroll (override clip above) */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stExpander"]
+  div[data-testid="stDataFrame"],
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  .bst-fm-preview-anchor ~ div[data-testid="stElementContainer"]:has([data-testid="stDataFrame"])
+  div[data-testid="stDataFrame"] {
+  overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stExpander"]
+  div[data-testid="stDataFrame"]
+  .dvn-scroller,
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  .bst-fm-preview-anchor ~ div[data-testid="stElementContainer"]:has([data-testid="stDataFrame"])
+  div[data-testid="stDataFrame"]
+  .dvn-scroller {
+  overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
+/* ── Download button row ────────────────────────────────────────────────────── */
+[data-testid="stDownloadButton"] button {
+  border-radius: var(--bst-radius-sm) !important;
+}
+
+/* ── Focus visible (keyboard) — hub chat input excluded ─────────────────────── */
+.stApp button:focus-visible:not([data-testid="stChatInput"] button),
+.stApp input:focus-visible,
+.stApp [role="slider"]:focus-visible {
+  outline: 2px solid var(--bst-accent) !important;
+  outline-offset: 2px !important;
+}
+
+.stApp textarea:focus-visible {
+  outline: none !important;
+}
+
+div[data-testid="stTextArea"] textarea:focus-visible {
+  outline: none !important;
+}

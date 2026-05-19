@@ -61,13 +61,24 @@ def chat(
     model: str,
     messages: list[dict[str, str]],
     *,
+    system: str | None = None,
     temperature: float = 0.7,
     timeout_s: float = 120.0,
 ) -> str:
     url = f"{base_url.rstrip('/')}/api/chat"
+    api_messages = list(messages)
+    if system and system.strip():
+        api_messages = [
+            {"role": "system", "content": system.strip()},
+            *[
+                m
+                for m in messages
+                if not (m.get("role") == "system" and isinstance(m.get("content"), str))
+            ],
+        ]
     payload: dict[str, Any] = {
         "model": model,
-        "messages": messages,
+        "messages": api_messages,
         "stream": False,
         "options": {"temperature": temperature},
     }

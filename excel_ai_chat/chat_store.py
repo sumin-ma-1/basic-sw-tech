@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from excel_ai_chat.excel_chat_files import delete_chat_workspace
 from excel_ai_chat.paths import chats_dir
 
 _MODE_CHAT = "chat"
@@ -54,16 +55,20 @@ def create_conversation_id() -> str:
     return str(uuid.uuid4())
 
 
-def public_messages(messages: list[dict[str, Any]]) -> list[dict[str, str]]:
+def public_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Drop hidden / system rows; keep only user and assistant turns for storage."""
-    out: list[dict[str, str]] = []
+    out: list[dict[str, Any]] = []
     for m in messages:
         if m.get("_hidden"):
             continue
         role = m.get("role")
         if role not in ("user", "assistant"):
             continue
-        out.append({"role": str(role), "content": str(m.get("content", ""))})
+        row: dict[str, Any] = {"role": str(role), "content": str(m.get("content", ""))}
+        att = m.get("attached_files")
+        if isinstance(att, list) and att:
+            row["attached_files"] = [str(x) for x in att]
+        out.append(row)
     return out
 
 
@@ -176,6 +181,17 @@ def rename_conversation(chat_id: str, title: str) -> bool:
     return True
 
 
+def delete_all_conversations(*, mode: str) -> int:
+    """Delete every saved conversation for *mode* (and each chat workspace). Returns count removed."""
+    removed = 0
+    for row in list_conversations(mode=mode):
+        cid = str(row.get("id") or "")
+        if cid and delete_conversation(cid):
+            removed += 1
+    clear_last_active_id(mode)
+    return removed
+
+
 def delete_conversation(chat_id: str) -> bool:
     path = chat_file_path(chat_id)
     if not path.is_file():
@@ -186,6 +202,7 @@ def delete_conversation(chat_id: str) -> bool:
     except (OSError, json.JSONDecodeError):
         mode = None
     path.unlink()
+    delete_chat_workspace(chat_id)
     if isinstance(mode, str):
         last_path = _last_active_path(mode)
         if last_path.is_file():

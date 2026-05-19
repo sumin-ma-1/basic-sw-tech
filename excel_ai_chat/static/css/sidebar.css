@@ -1,0 +1,716 @@
+/* sidebar.css — 사이드바 전체 (파일매니저 진입, 히스토리, 행/메뉴) */
+/* ── Sidebar ───────────────────────────────────────────────────────────────── */
+section[data-testid="stSidebar"] {
+  border-right: 1px solid var(--bst-border) !important;
+  box-shadow: var(--bst-shadow-xs);
+}
+
+section[data-testid="stSidebar"] .block-container {
+  padding-top: 1.25rem !important;
+}
+
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] [data-testid="stHeader"] {
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  color: var(--bst-ink) !important;
+}
+
+section[data-testid="stSidebar"] [data-baseweb="input"] input,
+section[data-testid="stSidebar"] textarea {
+  border-radius: var(--bst-radius-sm) !important;
+  transition: border-color var(--bst-transition), box-shadow var(--bst-transition) !important;
+}
+
+section[data-testid="stSidebar"] [data-baseweb="slider"] [role="slider"] {
+  box-shadow: 0 0 0 2px var(--bst-surface-elevated), var(--bst-shadow-xs) !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stDivider"] {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+  border-color: var(--bst-border) !important;
+}
+
+section[data-testid="stSidebar"] [data-baseweb="select"] > div {
+  border-radius: var(--bst-radius-sm) !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stAlert"],
+section[data-testid="stSidebar"] [data-testid="stAlert"] p,
+section[data-testid="stSidebar"] [data-testid="stExpander"] {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+section[data-testid="stSidebar"] [data-testid="stAlert"] pre,
+section[data-testid="stSidebar"] [data-testid="stCode"] pre,
+section[data-testid="stSidebar"] [data-testid="stCode"] code {
+  white-space: pre-wrap !important;
+  word-break: break-word;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+section[data-testid="stSidebar"] .block-container {
+  overflow-x: hidden;
+}
+
+/* ── Sidebar: Excel File Manager (manual workflow) ─────────────────────────── */
+section[data-testid="stSidebar"] .bst-sidebar-fm-kicker {
+  margin: 0 0 0.4rem;
+  padding: 0 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bst-muted-2);
+  line-height: 1.35;
+}
+
+.stApp [class*="st-key-sidebar_open_file_manager"] {
+  position: relative;
+  margin: 0 0 0.15rem !important;
+}
+
+.stApp [class*="st-key-sidebar_open_file_manager"] .stButton > button,
+.stApp [class*="st-key-sidebar_open_file_manager"] [data-testid="baseButton-secondary"] {
+  text-align: left !important;
+  padding: 0.62rem 0.85rem !important;
+  font-size: 0.86rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+}
+
+.stApp [class*="st-key-sidebar_open_file_manager"] .stButton > button p,
+.stApp [class*="st-key-sidebar_open_file_manager"] .stButton > button span {
+  color: inherit !important;
+  margin: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-fm-anchor--active)
+  [class*="st-key-sidebar_open_file_manager"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-fm-anchor--active)
+  [class*="st-key-sidebar_open_file_manager"]
+  [data-testid="baseButton-secondary"] {
+  border-color: var(--bst-border-strong) !important;
+  font-weight: 650 !important;
+}
+
+section[data-testid="stSidebar"]
+  [class*="st-key-sidebar_open_file_manager"]
+  + div[data-testid="stElementContainer"]
+  [data-testid="stCaptionContainer"],
+section[data-testid="stSidebar"]
+  [class*="st-key-sidebar_open_file_manager"]
+  ~ div[data-testid="stElementContainer"]:has([data-testid="stCaptionContainer"]) {
+  margin-top: -0.15rem !important;
+}
+
+section[data-testid="stSidebar"]
+  [class*="st-key-sidebar_open_file_manager"]
+  ~ div:has([data-testid="stCaptionContainer"])
+  p {
+  font-size: 0.72rem !important;
+  color: var(--bst-muted-2) !important;
+  text-align: center !important;
+  line-height: 1.35 !important;
+}
+
+/* ── Sidebar: "Chat history" 라벨 ──────────────────────────────────────────── */
+section[data-testid="stSidebar"] .bst-sidebar-history-kicker {
+  margin-top: 0;
+  margin-bottom: 0.35rem !important;
+}
+
+/* ── Sidebar: New chat + Clear all pill 버튼 ────────────────────────────────── */
+/* "Chat history" 라벨 ↔ 버튼 row 간격 + 버튼 row ↔ 히스토리 목록 간격
+   st.columns()은 stVerticalBlock의 직접 자식(stHorizontalBlock)으로 렌더됨.
+   stElementContainer에 감싸이지 않으므로 stHorizontalBlock에 직접 margin을 걸어야 함. */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-sidebar_new_chat_"]) {
+  gap: 0.4rem !important;
+  margin-top: 0.65rem !important;
+  margin-bottom: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-sidebar_new_chat_"])
+  > [data-testid="column"] {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+/* 공통 wrapper / 내부 블록 초기화 */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"] {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="stVerticalBlock"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="stElementContainer"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="stVerticalBlockBorderWrapper"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  [data-testid="stVerticalBlock"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  [data-testid="stElementContainer"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  [data-testid="stVerticalBlockBorderWrapper"] {
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  .stButton {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 공통 버튼 형태 (모양, 크기, 폰트 — 두 버튼 동일) */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="baseButton-secondary"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  [data-testid="baseButton-secondary"] {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0.22rem 0.5rem !important;
+  margin: 0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  font-size: 0.72rem !important;
+  font-weight: 400 !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0.01em;
+  border-radius: var(--bst-radius-pill) !important;
+  text-decoration: none !important;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.15s ease !important;
+}
+
+/* 공통 버튼 내부 텍스트 상속 */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton > button p,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton > button span,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  .stButton > button p,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  .stButton > button span {
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  margin: 0 !important;
+}
+
+/* New chat — slate 색상 */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="baseButton-secondary"] {
+  border: 1px solid var(--bst-new-chat-pill-border) !important;
+  background: var(--bst-new-chat-pill-bg) !important;
+  background-color: var(--bst-new-chat-pill-bg) !important;
+  color: var(--bst-new-chat-pill-ink) !important;
+  box-shadow: var(--bst-new-chat-pill-shadow) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton > button:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="baseButton-secondary"]:hover {
+  background: var(--bst-new-chat-pill-hover-bg) !important;
+  background-color: var(--bst-new-chat-pill-hover-bg) !important;
+  border-color: var(--bst-new-chat-pill-hover-border) !important;
+  color: var(--bst-new-chat-pill-hover-ink) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--bst-new-chat-pill-hover-shadow) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  .stButton > button:active,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_new_chat_"]
+  [data-testid="baseButton-secondary"]:active {
+  transform: translateY(0) !important;
+}
+
+/* Clear all — 붉은 계열 색상 */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  .stButton > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  [data-testid="baseButton-secondary"] {
+  border: 1px solid rgba(220, 38, 38, 0.4) !important;
+  background: rgba(254, 226, 226, 0.85) !important;
+  background-color: rgba(254, 226, 226, 0.85) !important;
+  color: #b91c1c !important;
+  box-shadow: 0 1px 2px rgba(185, 28, 28, 0.1) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  .stButton > button:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  [data-testid="baseButton-secondary"]:hover {
+  background: rgba(254, 202, 202, 0.98) !important;
+  background-color: rgba(254, 202, 202, 0.98) !important;
+  border-color: rgba(220, 38, 38, 0.6) !important;
+  color: #991b1b !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.18) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  .stButton > button:active,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  [data-testid="baseButton-secondary"]:active {
+  transform: translateY(0) !important;
+}
+
+/* Clear all — 다크 모드 */
+html[data-theme="dark"]
+  section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  .stButton > button,
+html[data-theme="dark"]
+  section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  [data-testid="baseButton-secondary"] {
+  border-color: rgba(248, 113, 113, 0.4) !important;
+  background: rgba(127, 29, 29, 0.5) !important;
+  background-color: rgba(127, 29, 29, 0.5) !important;
+  color: #fca5a5 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"]
+  section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  .stButton > button:hover,
+html[data-theme="dark"]
+  section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-sidebar_clear_all_"]
+  [data-testid="baseButton-secondary"]:hover {
+  background: rgba(153, 27, 27, 0.7) !important;
+  background-color: rgba(153, 27, 27, 0.7) !important;
+  border-color: rgba(248, 113, 113, 0.6) !important;
+  color: #fee2e2 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+section[data-testid="stSidebar"] .bst-sidebar-new-chat-anchor {
+  display: block;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor) .bst-sidebar-archive-empty {
+  margin: 0 0 0.2rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--bst-muted-2);
+  text-align: center;
+  border: 1px dashed var(--bst-border);
+  border-radius: var(--bst-radius-md);
+  background: var(--bst-surface);
+}
+
+
+/* History item component (keys: bst_hist_item_*, bst_hist_menu_*) */
+section[data-testid="stSidebar"] .bst-hist-item-anchor {
+  display: block;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Row container (st.container key bst_hist_row_*) — hover via .bst-hist-row-hover JS */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"] {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 -0.5rem !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  transition: background 0.12s ease !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover {
+  background: var(--bst-hist-item-hover) !important;
+  /* Highlight extends a bit past the ⋯ control */
+  padding-right: 0.65rem !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-active,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:has(.bst-hist-item-anchor.is-active),
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-active {
+  background: var(--bst-hist-item-active) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-active.bst-hist-row-hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:has(.bst-hist-item-anchor.is-active):hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-active.bst-hist-row-hover {
+  background: var(--bst-hist-item-active-hover) !important;
+  padding-right: 0.65rem !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="stElementContainer"] {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="stHorizontalBlock"] {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  width: 100% !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="column"] {
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Title column — shrink to label width (⋯ sits right after text) */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]
+  [data-testid="column"]:has([class*="st-key-bst_hist_item_"]) {
+  flex: 0 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: calc(100% - 0.5rem) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"] {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  [data-testid="baseButton-secondary"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  [data-testid="baseButton-tertiary"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0.26rem 0.2rem 0.26rem 0.45rem !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 0.8125rem !important;
+  font-weight: 450 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  color: var(--bst-ink) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transition: color 0.12s ease !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:has(.bst-hist-item-anchor.is-active)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:has(.bst-hist-item-anchor.is-active)
+  [class*="st-key-bst_hist_item_"]
+  [data-testid="baseButton-secondary"] {
+  font-weight: 500 !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button
+  p,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button
+  span {
+  display: block !important;
+  width: auto !important;
+  max-width: 100% !important;
+  text-align: left !important;
+  color: inherit !important;
+  margin: 0 !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  .stButton
+  > button:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_item_"]
+  [data-testid="baseButton-secondary"]:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--bst-ink) !important;
+}
+
+/* ⋯ menu — hidden until row hover (.bst-hist-row-hover) or focus */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:not(.bst-hist-row-hover):not(:focus-within)
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]) {
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:not(.bst-hist-row-hover):not(:focus-within)
+  [class*="st-key-bst_hist_menu_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:not(.bst-hist-row-hover):not(:focus-within)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]),
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:focus-within
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]),
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]),
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover:focus-within
+  [data-testid="column"]:has([class*="st-key-bst_hist_menu_"]) {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin-left: -0.32rem !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover
+  [class*="st-key-bst_hist_menu_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"]:focus-within
+  [class*="st-key-bst_hist_menu_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover
+  [class*="st-key-bst_hist_menu_"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  .bst-hist-row-hover:focus-within
+  [class*="st-key-bst_hist_menu_"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Popover/expander — hide default dropdown chevron (keep ⋯ text only) */
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stIconMaterial"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"]
+  [data-testid="stIconMaterial"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  details
+  summary
+  svg,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stExpanderToggleIcon"] {
+  display: none !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"] {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em;
+  line-height: 1 !important;
+  border: none !important;
+  border-radius: var(--bst-radius-sm) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--bst-muted-2) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover
+  [class*="st-key-bst_hist_menu_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_row_"].bst-hist-row-hover
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"],
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  .stButton
+  > button:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_menu_"]
+  [data-testid="stPopoverButton"]:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--bst-ink) !important;
+}
+
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_delete_"]
+  .stButton
+  > button:hover,
+section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_delete_"]
+  [data-testid="baseButton-secondary"]:hover {
+  color: #b91c1c !important;
+  background: rgba(220, 38, 38, 0.1) !important;
+  border-color: rgba(220, 38, 38, 0.28) !important;
+}
+
+html[data-theme="dark"]
+  section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_delete_"]
+  .stButton
+  > button:hover,
+html[data-theme="dark"]
+  section[data-testid="stSidebar"]:has(.bst-sidebar-history-anchor)
+  [class*="st-key-bst_hist_delete_"]
+  [data-testid="baseButton-secondary"]:hover {
+  color: #f87171 !important;
+  background: rgba(248, 113, 113, 0.14) !important;
+  border-color: rgba(248, 113, 113, 0.35) !important;
+}

@@ -16,7 +16,7 @@
   white-space: nowrap;
   max-width: 0;
   vertical-align: bottom;
-  animation: bst-welcome-typing 3s steps(44, end) 0.12s forwards;
+  animation: bst-welcome-typing 3s steps(var(--bst-welcome-chars, 44), end) 0.12s forwards;
 }
 
 .bst-welcome-type__caret {
@@ -35,7 +35,7 @@
 
 @keyframes bst-welcome-typing {
   to {
-    max-width: 44ch;
+    max-width: calc(var(--bst-welcome-chars, 44) * 1ch);
   }
 }
 
