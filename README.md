@@ -16,45 +16,6 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 단일 Streamlit 앱(`excel_ai_chat/app.py`)이 UI·상태·라우팅을 담당하고, 도메인 로직은 패키지 모듈로 분리합니다. 외부 의존은 **Ollama HTTP API**와 **로컬 디스크**(`uploads/`, `outputs/`)입니다.
 
-```mermaid
-flowchart TB
-  subgraph UI["Streamlit UI (app.py)"]
-    Sidebar[사이드바: Ollama 설정 · 파일 관리자 · 채팅 기록]
-    Hub[허브: 일반 채팅 / Excel 모드]
-    FM[파일 관리자 페이지]
-  end
-
-  subgraph Core["excel_ai_chat 패키지"]
-    Theme[theme.py → CSS 주입]
-    Store[chat_store.py → 대화 JSON]
-    Files[excel_chat_files.py → 첨부·보내기]
-    Ollama[ollama_client.py]
-    Prompts[prompts.py]
-    Agent[excel_agent.py + code_runner.py]
-    Tools[excel_tools.py]
-    HistUI[history_ui.py]
-    Export[export_utils.py]
-    Paths[paths.py]
-  end
-
-  subgraph External["외부"]
-    OllamaAPI[Ollama :11434]
-    Disk[(uploads/ · outputs/chats/)]
-  end
-
-  Sidebar --> Hub
-  Sidebar --> FM
-  Hub --> Ollama
-  Hub --> Agent
-  Hub --> Store
-  Hub --> Files
-  FM --> Tools
-  Agent --> Ollama
-  Store --> Disk
-  Files --> Disk
-  Theme --> UI
-```
-
 ### 화면·모드 라우팅
 
 | `session_state` | 값 | 화면 |
