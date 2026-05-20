@@ -33,5 +33,10 @@ def chats_dir() -> Path:
     return p
 
 
+def personalization_path() -> Path:
+    """User personalization / custom instructions (gitignored under outputs/)."""
+    return outputs_dir() / "personalization.json"
+
+
 def default_ollama_base() -> str:
     return os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")

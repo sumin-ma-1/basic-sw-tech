@@ -31,6 +31,7 @@ def inject_hub_theme(session_key: str = "_bst_hub_theme_css") -> None:
                 _read_css("variables.css"),
                 _read_css("global.css"),
                 _read_css("sidebar.css"),
+                _read_css("personalization.css"),
                 _read_css("hub.css"),
                 _read_css("file_manager.css"),
                 _read_css("hub_animations.css"),
@@ -54,3 +55,44 @@ def inject_hub_theme(session_key: str = "_bst_hub_theme_css") -> None:
         scrolling=False,
     )
     st.session_state[session_key] = True
+    _inject_profile_fab_dock()
+
+
+def _inject_profile_fab_dock() -> None:
+    """Re-parent profile button to document.body so position:fixed is always visible."""
+    components.html(
+        "<script>(function(){"
+        "var doc=window.parent.document;"
+        "var timer=null;"
+        "function findBtnWrap(){"
+        "var anchor=doc.getElementById('bst-profile-fab-anchor');"
+        "if(!anchor)return null;"
+        "var wrap=anchor.closest('.stElementContainer');"
+        "if(!wrap)return null;"
+        "var next=wrap.nextElementSibling;"
+        "while(next){"
+        "if(next.querySelector&&next.querySelector('[class*=\"st-key-bst_profile_open\"]'))"
+        "return next;"
+        "next=next.nextElementSibling;"
+        "}"
+        "return null;"
+        "}"
+        "function dock(){"
+        "var btnWrap=findBtnWrap();"
+        "if(!btnWrap)return;"
+        "btnWrap.classList.add('bst-profile-fab-docked');"
+        "if(btnWrap.parentElement!==doc.body)doc.body.appendChild(btnWrap);"
+        "}"
+        "function schedule(){"
+        "if(timer)clearTimeout(timer);"
+        "timer=setTimeout(dock,40);"
+        "}"
+        "schedule();"
+        "if(!doc.__bstProfileFabObs){"
+        "doc.__bstProfileFabObs=new MutationObserver(schedule);"
+        "doc.__bstProfileFabObs.observe(doc.body,{childList:true,subtree:true});"
+        "}"
+        "})();</script>",
+        height=0,
+        scrolling=False,
+    )

@@ -201,13 +201,110 @@ section[data-testid="stMain"]:has(#bst-excel-composer)
   display: none !important;
 }
 
-/* 엑셀 모드: textarea 왼쪽 padding 축소 — 클립 버튼과 텍스트 간격 조정
-   top/bottom/right padding 은 유지 (변경 시 height 계산 깨져 2행 확장됨) */
+/* 엑셀 모드: pill 안 textarea — 허브 기본 18px 왼쪽 패딩 제거(클립 옆 이중 여백 방지) */
 section[data-testid="stMain"]:has(#bst-excel-composer)
   [data-testid="stChatInput"] textarea {
   padding-left: 0 !important;
 }
 
+/* columns gap="small" 제거 — 클립과 textarea 사이 여분 공간 제거 */
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-excel_clip_btn"]) {
+  gap: 0 !important;
+}
+
+/* 클립 열: pill 안 좁은 구역, 아이콘 가운데 */
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-excel_clip_btn"])
+  > [data-testid="column"]:first-child {
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-excel_clip_btn"])
+  > [data-testid="column"]:first-child
+  [class*="st-key-excel_clip_btn"] {
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+}
+
+/* Streamlit help 툴팁 래퍼가 flex-end + width 100% 로 아이콘을 오른쪽으로 밀어 빈칸 생김 */
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [class*="st-key-excel_clip_btn"]
+  [data-testid="stTooltipHoverTarget"] {
+  width: auto !important;
+  max-width: 100% !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex: 0 0 auto !important;
+}
+
+section[data-testid="stMain"]:has(#bst-chat-composer):not(:has(#bst-excel-composer))
+  [data-testid="stChatInput"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+section[data-testid="stMain"]:has(#bst-chat-composer):not(:has(#bst-excel-composer))
+  [data-testid="stChatInput"]
+  [data-testid="stVerticalBlockBorderWrapper"] {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+section[data-testid="stMain"]:has(#bst-chat-composer):not(:has(#bst-excel-composer))
+  [data-testid="stChatInput"]
+  [data-testid="stHorizontalBlock"] {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  gap: 0 !important;
+}
+
+section[data-testid="stMain"]:has(#bst-chat-composer):not(:has(#bst-excel-composer))
+  [data-testid="stChatInput"] textarea {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 14px 8px 14px 14px !important;
+}
+
+section[data-testid="stMain"]:has(#bst-chat-composer):not(:has(#bst-excel-composer))
+  [data-testid="stChatInput"]
+  button,
+section[data-testid="stMain"]:has(#bst-chat-composer):not(:has(#bst-excel-composer))
+  [data-testid="stChatInput"]
+  [data-testid*="Submit"] {
+  position: static !important;
+  flex: 0 0 auto !important;
+  align-self: center !important;
+}
+
+/* 클립: help 제거 후에도 Streamlit이 감싸면 레이아웃만 평탄화 */
+.stApp [class*="st-key-excel_clip_btn"] .stTooltipIcon {
+  display: contents !important;
+}
 
 /* 클립 버튼 — 테두리/배경 없는 아이콘 스타일 */
 .stApp [class*="st-key-excel_clip_btn"] .stButton > button,

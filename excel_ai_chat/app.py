@@ -46,10 +46,22 @@ from excel_ai_chat.excel_chat_files import (
     save_attachments,
 )
 from excel_ai_chat.paths import default_ollama_base, outputs_dir, uploads_dir
+from excel_ai_chat.personalization import (
+    PersonalizationSettings,
+    load_personalization,
+    save_personalization,
+    personalization_system_block,
+    merge_system_with_personalization,
+    _hydrate_personalization_widgets,
+    _personalization_from_session,
+    _process_profile_save_pending,
+    _render_sidebar_personalization,
+    _render_floating_profile_control,
+    _system_prompt_for_hub,
+)
 from excel_ai_chat.prompts import (
     build_ollama_messages,
     build_spreadsheet_data_block,
-    system_prompt_for_mode,
 )
 from excel_ai_chat.theme import inject_hub_theme
 
@@ -218,89 +230,25 @@ def _fm_del_button_key(filename: str) -> str:
     return f"bst_fm_del_{token}"[:80]
 
 
+_FM_DELETE_JS = (
+    Path(__file__).resolve().parent / "static" / "js" / "fm_delete.js"
+)
+
 def _fm_library_delete_styles() -> None:
-    """Red Delete button JS paint (base styles from hub_theme.css via <head>)."""
-    components.html(
-        "<script>(function(){"
-        "const d=window.parent.document;"
-        "const paint=(btn)=>{if(!btn)return;"
-        "const s=(k,v)=>btn.style.setProperty(k,v,'important');"
-        "const base=()=>{"
-        "s('color','#b91c1c');s('background-color','rgba(239,68,68,0.12)');"
-        "s('border','1px solid rgba(220,38,38,0.55)');"
-        "s('font-weight','600');"
-        "s('box-shadow','0 1px 2px rgba(239,68,68,0.1)');"
-        "btn.querySelectorAll('p,span').forEach((n)=>s('color','inherit'));};"
-        "const hover=()=>{"
-        "s('color','#fff');s('background-color','#dc2626');"
-        "s('border-color','#b91c1c');"
-        "s('box-shadow','0 3px 10px rgba(220,38,38,0.32)');};"
-        "base();"
-        "if(!btn.dataset.bstDelFx){btn.dataset.bstDelFx='1';"
-        "btn.addEventListener('mouseenter',hover);"
-        "btn.addEventListener('mouseleave',base);}};"
-        "const run=()=>{"
-        "d.querySelectorAll('[class*=\"st-key-bst_fm_del_\"]').forEach((w)=>{"
-        "const btn=w.matches('button')?w:w.querySelector('button');"
-        "paint(btn);});};"
-        "run();"
-        "new MutationObserver(run).observe(d.body,{childList:true,subtree:true});"
-        "setTimeout(run,30);setTimeout(run,200);setTimeout(run,700);"
-        "})();</script>",
-        height=0,
-        scrolling=False,
-    )
+    """Red Delete button JS paint (static/js/fm_delete.js)."""
+    js = _FM_DELETE_JS.read_text(encoding="utf-8")
+    components.html(f"<script>{js}</script>", height=0, scrolling=False)
+
+
+_CHIP_STYLES_JS = (
+    Path(__file__).resolve().parent / "static" / "js" / "chip_styles.js"
+)
 
 
 def _hub_excel_chip_styles() -> None:
-    """Teal Excel chips + × exit — JS paint for hover/dark-mode (base styles from hub_theme.css)."""
-    components.html(
-        "<script>(function(){"
-        "const d=window.parent.document;"
-        "const dark=()=>d.documentElement.getAttribute('data-theme')==='dark';"
-        "const pal=()=>dark()?{"
-        "bg:'rgba(13,148,136,0.14)',bd:'rgba(45,212,191,0.48)',fg:'#5eead4',"
-        "hbg:'rgba(45,212,191,0.26)',hbd:'#2dd4bf',hfg:'#ccfbf1',sh:'0 1px 4px rgba(13,148,136,.28)'"
-        "}:{"
-        "bg:'#ccfbf1',bd:'#5eead4',fg:'#0f766e',"
-        "hbg:'#99f6e4',hbd:'#2dd4bf',hfg:'#115e59',sh:'0 1px 3px rgba(13,148,136,.14)'};"
-        "const s=(b,k,v)=>b&&b.style.setProperty(k,v,'important');"
-        "const paint=(btn,isExit)=>{if(!btn)return;const c=pal();const dk=dark();"
-        "s(btn,'background',dk?"
-        "'linear-gradient(180deg,rgba(45,212,191,.16) 0%,'+c.bg+' 100%)':"
-        "'linear-gradient(180deg,#f0fdfa 0%,#ccfbf1 100%)');"
-        "s(btn,'background-color',c.bg);s(btn,'border','1px solid '+c.bd);"
-        "s(btn,'color',c.fg);s(btn,'font-weight','600');s(btn,'border-radius','999px');"
-        "s(btn,'box-shadow','0 1px 0 rgba(255,255,255,.55) inset, '+c.sh);"
-        "s(btn,'filter','none');"
-        "s(btn,'transform',isExit?'none':'translateY(0)');"
-        "if(isExit){s(btn,'width','2.4rem');s(btn,'height','2.4rem');s(btn,'min-height','2.4rem');"
-        "s(btn,'padding','0');s(btn,'display','flex');s(btn,'align-items','center');"
-        "s(btn,'justify-content','center');s(btn,'font-size','1.15rem');s(btn,'line-height','1');}"
-        "btn.querySelectorAll('p,span').forEach((n)=>s(n,'color','inherit'));"
-        "if(!btn.dataset.bstExcelFx){btn.dataset.bstExcelFx='1';"
-        "btn.addEventListener('mouseenter',()=>{const h=pal();"
-        "s(btn,'background-color',h.hbg);s(btn,'border-color',h.hbd);s(btn,'color',h.hfg);"
-        "if(!isExit){s(btn,'transform','translateY(-2px)');"
-        "s(btn,'box-shadow','0 1px 0 rgba(255,255,255,.45) inset, 0 2px 8px rgba(13,148,136,.22), 0 4px 14px rgba(13,148,136,.24)');}});"
-        "btn.addEventListener('mouseleave',()=>paint(btn,isExit));}};"
-        "const after=(id)=>{const a=d.getElementById(id);if(!a)return null;"
-        "let n=a.nextElementSibling;for(let i=0;i<6&&n;i++){"
-        "const b=n.querySelector&&n.querySelector('button');if(b)return b;n=n.nextElementSibling;}"
-        "return null;};"
-        "const run=()=>{"
-        "d.querySelectorAll('[class*=\"st-key-hub_enter_excel\"]').forEach((w)=>{"
-        "paint(w.matches('button')?w:w.querySelector('button'),false);});"
-        "d.querySelectorAll('[class*=\"st-key-hub_exit_excel\"]').forEach((w)=>{"
-        "paint(w.matches('button')?w:w.querySelector('button'),true);});"
-        "paint(after('bst-mode-toggle-chat'),false);"
-        "paint(after('bst-mode-toggle-excel'),true);};"
-        "run();new MutationObserver(run).observe(d.body,{childList:true,subtree:true});"
-        "setTimeout(run,30);setTimeout(run,200);setTimeout(run,700);"
-        "})();</script>",
-        height=0,
-        scrolling=False,
-    )
+    """Teal Excel chips + × exit — JS paint (static/js/chip_styles.js)."""
+    js = _CHIP_STYLES_JS.read_text(encoding="utf-8")
+    components.html(f"<script>{js}</script>", height=0, scrolling=False)
 
 
 def _purge_hub_widget_keys() -> None:
@@ -369,6 +317,7 @@ def _init_state() -> None:
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+    _hydrate_personalization_widgets()
 
 
 # ── Chat history (outputs/chats/*.json) ───────────────────────────────────────
@@ -929,9 +878,6 @@ def _render_excel_message_attachments(names: list[str]) -> None:
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-_EXCEL_ATTACH_TOOLTIP = "Add sheets (CSV, XLSX, XLSM, XLS)"
-
-
 def _pending_remove_widget_key(name: str) -> str:
     safe = re.sub(r"[^a-zA-Z0-9_]", "_", name)
     return f"excel_rm_pending_{safe[:48]}"
@@ -990,169 +936,13 @@ def _render_excel_pending_inbox() -> None:
     st.markdown("</div></div>", unsafe_allow_html=True)
 
 
-def _excel_composer_clip_bind() -> None:
-    """Wire HTML clip button → hidden file_uploader (no Streamlit rerun)."""
-    components.html(
-        """
-<script>
-(function () {
-  const doc = window.parent.document;
-  const win = window.parent;
+_COMPOSER_BIND_JS = Path(__file__).resolve().parent / "static" / "js" / "composer_bind.js"
 
-  function uploaderRoot() {
-    const root = doc.getElementById("bst-excel-composer");
-    if (!root) return null;
-    const main = root.closest('section[data-testid="stMain"]') || doc;
-    return main.querySelector('[data-testid="stFileUploader"]');
-  }
 
-  function openPicker() {
-    const box = uploaderRoot();
-    if (!box) return;
-    const input = box.querySelector('input[type="file"]');
-    if (input) {
-      input.click();
-      return;
-    }
-    const browse = box.querySelector("button");
-    if (browse) browse.click();
-  }
-
-  /* [클립 | 입력 | 보내기] 를 하나의 둥근 입력창처럼 표현.
-     CSS !important 규칙은 setProperty("prop","val","important") 로만 덮을 수 있음. */
-  function styleUnifiedInput() {
-    var root = doc.getElementById("bst-excel-composer");
-    if (!root) return false;
-    var main     = root.closest('section[data-testid="stMain"]') || doc;
-    var clipWrap = main.querySelector('[class*="st-key-excel_clip_btn"]');
-    if (!clipWrap || !clipWrap.getBoundingClientRect().width) return false;
-
-    var hBlock = clipWrap.closest('[data-testid="stHorizontalBlock"]');
-    if (!hBlock) return false;
-
-    /* 외부 컨테이너 → 통합 입력창 (CSS 변수로 다크모드 자동 대응) */
-    hBlock.style.setProperty("border",        "1px solid var(--bst-border-strong)", "important");
-    hBlock.style.setProperty("border-radius", "22px",                               "important");
-    hBlock.style.setProperty("background",    "var(--bst-surface-elevated)",        "important");
-    hBlock.style.setProperty("box-shadow",    "var(--bst-shadow-sm)",               "important");
-    hBlock.style.setProperty("gap",      "0",             "important");
-    hBlock.style.setProperty("padding",  "0 6px 0 0",     "important");
-    hBlock.style.setProperty("overflow", "hidden",        "important");
-    hBlock.style.alignItems = "center";
-
-    /* hBlock 내부 모든 div → 배경/테두리/여백 제거 */
-    hBlock.querySelectorAll("div").forEach(function(el) {
-      if (el === hBlock) return;
-      el.style.setProperty("background", "transparent", "important");
-      el.style.setProperty("border",     "none",        "important");
-      el.style.setProperty("box-shadow", "none",        "important");
-      el.style.setProperty("padding",    "0",           "important");
-      el.style.setProperty("margin",     "0",           "important");
-      el.style.setProperty("gap",        "0",           "important");
-    });
-
-    /* textarea — border 만 제거, padding/height 는 유지 (변경 시 클릭 때 2행 확장됨)
-       background 는 외부 컨테이너와 동일한 CSS 변수로 맞춤 */
-    var ta = hBlock.querySelector("textarea");
-    if (ta) {
-      ta.style.setProperty("border",        "none",                        "important");
-      ta.style.setProperty("box-shadow",    "none",                        "important");
-      ta.style.setProperty("border-radius", "0",                           "important");
-      ta.style.setProperty("background",    "var(--bst-surface-elevated)", "important");
-    }
-
-    /* 보내기 버튼 → 원형, 1줄=중앙 / 2줄+=하단 동적 전환 */
-    var sendBtn = hBlock.querySelector('[data-testid*="Submit"]') ||
-                  hBlock.querySelector('[data-testid="stChatInput"] button');
-    if (sendBtn) {
-      Object.assign(sendBtn.style, {
-        width: "2.2rem", height: "2.2rem", minHeight: "0",
-        borderRadius: "50%", padding: "0",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        flexShrink: "0", marginRight: "6px",
-      });
-
-      function updateBtnAlign() {
-        /* offsetHeight ~52px=1줄, ~76px=2줄 — 임계값 60 */
-        var multi = ta && ta.offsetHeight > 60;
-        sendBtn.style.alignSelf    = multi ? "flex-end" : "center";
-        sendBtn.style.marginBottom = multi ? "9px"      : "0";
-      }
-
-      if (ta && !ta.dataset.bstBtnAlign) {
-        ta.dataset.bstBtnAlign = "1";
-        ta.addEventListener("input", updateBtnAlign);
-      }
-      updateBtnAlign();
-    }
-
-    /* 클립 column → 정중앙 정렬 */
-    var clipCol = clipWrap.closest('[data-testid="column"]');
-    /* clip column → 아이콘 크기(32px)에 딱 맞게 고정 너비 */
-    if (clipCol) {
-      clipCol.style.setProperty("flex",      "0 0 36px", "important");
-      clipCol.style.setProperty("width",     "36px",     "important");
-      clipCol.style.setProperty("min-width", "36px",     "important");
-      clipCol.style.setProperty("max-width", "36px",     "important");
-      clipCol.style.setProperty("padding",   "0",        "important");
-      Object.assign(clipCol.style, {
-        display: "flex", alignItems: "center", justifyContent: "center",
-      });
-    }
-
-    /* input column → 나머지 공간 전부 */
-    var inputCol = hBlock.querySelector('[data-testid="column"]:last-child');
-    if (inputCol) {
-      inputCol.style.setProperty("flex",     "1 1 0", "important");
-      inputCol.style.setProperty("padding",  "0",     "important");
-      inputCol.style.setProperty("min-width","0",     "important");
-    }
-
-    /* 클립 내부 wrapper 들 정렬 */
-    clipWrap.querySelectorAll(
-      '[data-testid="stVerticalBlockBorderWrapper"],[data-testid="stVerticalBlock"],' +
-      '[data-testid="stElementContainer"],.stButton'
-    ).forEach(function(el) {
-      Object.assign(el.style, {
-        display: "flex", alignItems: "center", justifyContent: "center",
-        margin: "0", padding: "0", minHeight: "0", width: "100%",
-      });
-    });
-
-    return true;
-  }
-
-  function bindClip() {
-    const clipBtn = doc.querySelector('[class*="st-key-excel_clip_btn"] button');
-    if (!uploaderRoot() || !clipBtn || clipBtn.dataset.bstClipBound === "1") return;
-    clipBtn.dataset.bstClipBound = "1";
-    clipBtn.addEventListener("click", function(e) {
-      e.preventDefault(); e.stopPropagation(); openPicker();
-    });
-  }
-
-  function run() {
-    if (!doc.getElementById("bst-excel-composer")) return;
-    styleUnifiedInput();
-    bindClip();
-  }
-
-  [50, 150, 300, 500, 800, 1500, 2500].forEach(function(ms) {
-    setTimeout(run, ms);
-  });
-
-  if (!win.__bstExcelClipBind) {
-    win.__bstExcelClipBind = true;
-    new MutationObserver(function() { requestAnimationFrame(run); })
-      .observe(doc.body, { childList: true, subtree: true });
-  }
-  run();
-})();
-</script>
-        """,
-        height=0,
-        scrolling=False,
-    )
+def _composer_bind() -> None:
+    """Pill-style chat input (Excel + main chat) — static/js/composer_bind.js."""
+    js = _COMPOSER_BIND_JS.read_text(encoding="utf-8")
+    components.html(f"<script>{js}</script>", height=0, scrolling=False)
 
 
 def _render_excel_clip_button() -> None:
@@ -1161,7 +951,6 @@ def _render_excel_clip_button() -> None:
         "",
         icon=":material/attach_file:",
         key="excel_clip_btn",
-        help=_EXCEL_ATTACH_TOOLTIP,
         type="secondary",
         use_container_width=True,
     )
@@ -1185,13 +974,12 @@ def _render_excel_composer_row(
         key=_pending_uploader_key(),
         label_visibility="collapsed",
     )
-    st.markdown('<span id="bst-excel-composer-row" aria-hidden="true"></span>', unsafe_allow_html=True)
     clip_col, input_col = st.columns([0.065, 0.935], gap="small", vertical_alignment="center")
     with clip_col:
         _render_excel_clip_button()
     with input_col:
         prompt = st.chat_input(placeholder, key=widget_key, width="stretch")
-    _excel_composer_clip_bind()
+    _composer_bind()
 
     staged = False
     if _ingest_pending_uploads(uploaded):
@@ -1200,6 +988,14 @@ def _render_excel_composer_row(
         )
         staged = True
     return prompt, staged
+
+
+def _render_chat_composer_row(placeholder: str, widget_key: str) -> Any:
+    """Main chat — pill on chat_input only (no clip column / spacer)."""
+    st.markdown('<span id="bst-chat-composer"></span>', unsafe_allow_html=True)
+    prompt = st.chat_input(placeholder, key=widget_key, width="stretch")
+    _composer_bind()
+    return prompt
 
 
 _PREVIEW_SCROLL_HEIGHT_PX = 440
@@ -1294,7 +1090,7 @@ def _hub_complete_pending_chat_generation(model: str, temperature: float) -> Non
                 model,
                 build_ollama_messages(
                     st.session_state.messages,
-                    system=system_prompt_for_mode(MODE_CHAT),
+                    system=_system_prompt_for_hub(MODE_CHAT),
                 ),
                 temperature=temperature,
             )
@@ -1337,7 +1133,7 @@ def _excel_sync_spreadsheet_context(files: dict[str, pd.DataFrame]) -> None:
 def _excel_api_messages_built() -> list[dict[str, str]]:
     return build_ollama_messages(
         _excel_api_messages(),
-        system=system_prompt_for_mode(MODE_EXCEL),
+        system=_system_prompt_for_hub(MODE_EXCEL),
     )
 
 
@@ -1605,7 +1401,7 @@ def _render_hub_composer(mode: str, model: str, temperature: float) -> None:
         if prompt is None:
             return
     else:
-        prompt = st.chat_input(placeholder, key=widget_key, width="stretch")
+        prompt = _render_chat_composer_row(placeholder, widget_key)
 
     text = str(prompt).strip() if prompt else ""
     if mode == MODE_EXCEL:
@@ -1661,10 +1457,10 @@ def _render_mode_toggle(mode: str) -> None:
 
     if mode == MODE_CHAT:
         st.markdown('<span id="bst-mode-toggle-chat"></span>', unsafe_allow_html=True)
-        _, c, _ = st.columns([2.5, 1.05, 2.5])
+        _, c, _ = st.columns([2.5, 0.8, 2.5])
         with c:
             if st.button(
-                "Analyze Excel",
+                "Excel Agent",
                 key="hub_enter_excel",
                 type="secondary",
                 use_container_width=True,
@@ -2488,6 +2284,8 @@ def main() -> None:
         page_icon=page_icon,
         layout="wide",
     )
+    # Profile modal saves queue here; run before hydrate so disk reload cannot win.
+    _process_profile_save_pending()
     _init_state()
     inject_hub_theme()
 
@@ -2547,10 +2345,13 @@ def main() -> None:
         temperature = st.slider("Temperature", 0.0, 1.5, 0.7, 0.05)
 
         st.divider()
-        _render_sidebar_file_manager_nav()
+        _render_sidebar_personalization()
 
         st.divider()
         _render_sidebar_chat_history()
+
+        st.divider()
+        _render_sidebar_file_manager_nav()
 
         st.divider()
         st.caption("Favicon attribution")
@@ -2558,6 +2359,8 @@ def main() -> None:
             f'<p style="font-size:0.8rem;margin:0;">{FLATICON_OTTER_ATTR_HTML}</p>',
             unsafe_allow_html=True,
         )
+
+    _render_floating_profile_control()
 
     if st.session_state.nav_page == NAV_HUB:
         _render_hub(st.session_state.model_name, temperature)

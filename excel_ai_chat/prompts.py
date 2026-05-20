@@ -7,9 +7,12 @@ Design follows provider guidance: stable role/rules in system; per-turn data and
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
+
+if TYPE_CHECKING:
+    from excel_ai_chat.personalization import PersonalizationSettings
 
 PROMPT_VERSION = "1.2.1"
 
@@ -69,11 +72,23 @@ _ENV_CHAT = "OLLAMA_SYSTEM_CHAT"
 _ENV_EXCEL = "OLLAMA_SYSTEM_EXCEL"
 
 
-def system_prompt_for_mode(mode: str) -> str:
+def system_prompt_for_mode(
+    mode: str,
+    *,
+    personalization: PersonalizationSettings | None = None,
+) -> str:
     """Return system prompt for hub mode (`chat` or `excel`). Env vars override defaults."""
     if mode == "excel":
-        return os.environ.get(_ENV_EXCEL, EXCEL_ANALYSIS_SYSTEM).strip()
-    return os.environ.get(_ENV_CHAT, HUB_CHAT_SYSTEM).strip()
+        base = os.environ.get(_ENV_EXCEL, EXCEL_ANALYSIS_SYSTEM).strip()
+    else:
+        base = os.environ.get(_ENV_CHAT, HUB_CHAT_SYSTEM).strip()
+
+    if personalization is None:
+        return base
+
+    from excel_ai_chat.personalization import merge_system_with_personalization
+
+    return merge_system_with_personalization(base, personalization)
 
 
 def build_ollama_messages(

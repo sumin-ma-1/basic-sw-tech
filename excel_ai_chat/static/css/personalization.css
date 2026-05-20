@@ -1,0 +1,443 @@
+/* personalization.css — sidebar presets + custom instructions modal */
+
+/* ── Sidebar: Personalization block ─────────────────────────────────────────── */
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor) .stElementContainer:has(#bst-sidebar-pers-anchor) {
+  margin-bottom: 0.15rem !important;
+}
+
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [class*="st-key-bst_builtin_persona_select"] {
+  margin: 0 0 0.45rem !important;
+}
+
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [class*="st-key-bst_builtin_persona_select"]
+  [data-testid="stSelectbox"],
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [class*="st-key-bst_builtin_persona_select"]
+  [data-baseweb="select"] {
+  width: 100% !important;
+}
+
+/* Custom persona rows + New persona */
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [class*="st-key-bst_cp_sel_"]
+  .stButton
+  > button,
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [class*="st-key-bst_cp_sel_"]
+  [data-testid="baseButton-secondary"],
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [class*="st-key-bst_cp_sel_"]
+  [data-testid="baseButton-primary"] {
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  padding: 0.45rem 0.5rem !important;
+  min-height: 2rem;
+}
+
+.stApp [class*="st-key-bst_persona_create"] .stButton > button,
+.stApp [class*="st-key-bst_persona_create"] [data-testid="baseButton-secondary"] {
+  justify-content: flex-start !important;
+  gap: 0.4rem;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+}
+
+.stApp [class*="st-key-bst_persona_create"] .stButton > button::before,
+.stApp [class*="st-key-bst_persona_create"] [data-testid="baseButton-secondary"]::before {
+  content: "+";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--bst-accent);
+}
+
+/* ── Your personas 행: 이름 + Edit/Delete 각각 고정 슬롯(겹침 방지) ─────────── */
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-bst_cp_sel_"]) {
+  margin-bottom: 0.2rem !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+}
+
+/* 이름 열: 남는 폭 사용 */
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-bst_cp_sel_"])
+  > [data-testid="column"]:has([class*="st-key-bst_cp_sel_"]) {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+/* Edit / Delete: 동일 최소 너비로 아이콘 열 분리 (st.columns 6:1:1 과 함께 사용) */
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-bst_cp_sel_"])
+  > [data-testid="column"]:has([class*="st-key-bst_cp_edit_"]),
+section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor)
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-bst_cp_sel_"])
+  > [data-testid="column"]:has([class*="st-key-bst_cp_del_"]) {
+  flex: 0 1 auto !important;
+  min-width: 1.85rem !important;
+  max-width: 2.15rem !important;
+  width: auto !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Edit/Delete 아이콘 버튼 스타일 */
+.stApp [class*="st-key-bst_cp_edit_"] .stButton > button,
+.stApp [class*="st-key-bst_cp_del_"] .stButton > button,
+.stApp [class*="st-key-bst_cp_edit_"] [data-testid^="stBaseButton"],
+.stApp [class*="st-key-bst_cp_del_"] [data-testid^="stBaseButton"] {
+  width: 1.8rem !important;
+  height: 1.8rem !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 6px !important;
+  color: var(--bst-muted-2) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.12s ease, color 0.12s ease !important;
+}
+
+.stApp [class*="st-key-bst_cp_edit_"] .stButton > button:hover,
+.stApp [class*="st-key-bst_cp_edit_"] [data-testid^="stBaseButton"]:hover {
+  background: var(--bst-surface-2) !important;
+  color: var(--bst-ink) !important;
+}
+
+.stApp [class*="st-key-bst_cp_del_"] .stButton > button:hover,
+.stApp [class*="st-key-bst_cp_del_"] [data-testid^="stBaseButton"]:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #dc2626 !important;
+}
+
+/* ── Dialog (marker #bst-personalization-dialog) ───────────────────────────── */
+[data-testid="stDialog"]:has(#bst-personalization-dialog) {
+  background: rgba(15, 23, 42, 0.42) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] {
+  width: min(34rem, calc(100vw - 2rem)) !important;
+  max-width: 34rem !important;
+  max-height: min(90vh, 42rem) !important;
+  background: var(--bst-surface-elevated) !important;
+  border: 1px solid var(--bst-border) !important;
+  border-radius: var(--bst-radius-lg) !important;
+  box-shadow: 0 24px 64px -12px rgba(15, 23, 42, 0.22) !important;
+  padding: 0.85rem 0 0 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+html[data-theme="dark"]
+  [data-testid="stDialog"]:has(#bst-personalization-dialog)
+  [role="dialog"] {
+  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.55) !important;
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] > div {
+  padding: 0.3rem 1.25rem 1.15rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+/* Title row: BaseUI ModalHeader (first child of role=dialog), not always <header> */
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] > :first-child,
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] > header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 0 !important;
+  flex-shrink: 0 !important;
+  padding: 0 1rem 0.35rem !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--bst-border) !important;
+  background: transparent !important;
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] > :first-child h1,
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] > :first-child h2,
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] > :first-child p,
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] > header h1,
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] > header h2 {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  text-align: center !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  color: var(--bst-muted) !important;
+  line-height: 1.35 !important;
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) #bst-personalization-dialog {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [data-testid="stForm"] {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] [data-testid="stCaptionContainer"] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] [data-testid="stCaptionContainer"] p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] [data-testid="stVerticalBlock"] {
+  gap: 0.75rem !important;
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) [role="dialog"] [data-testid="stHorizontalBlock"] {
+  margin-top: auto !important;
+  padding-top: 0.25rem !important;
+}
+
+[data-testid="stDialog"]:has(#bst-personalization-dialog) input[type="text"],
+[data-testid="stDialog"]:has(#bst-personalization-dialog) textarea {
+  border-radius: var(--bst-radius-sm) !important;
+  border: 1px solid var(--bst-border-strong) !important;
+  background: var(--bst-surface) !important;
+  font-size: 0.9rem !important;
+}
+
+/* ── Profile dialog (marker #bst-profile-dialog) ───────────────────────────── */
+[data-testid="stDialog"]:has(#bst-profile-dialog) {
+  background: rgba(15, 23, 42, 0.42) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] {
+  width: min(34rem, calc(100vw - 2rem)) !important;
+  max-width: 34rem !important;
+  max-height: min(90vh, 40rem) !important;
+  background: var(--bst-surface-elevated) !important;
+  border: 1px solid var(--bst-border) !important;
+  border-radius: var(--bst-radius-lg) !important;
+  box-shadow: 0 24px 64px -12px rgba(15, 23, 42, 0.22) !important;
+  padding: 0.85rem 0 0 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] > div {
+  padding: 0.3rem 1.25rem 1.15rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] > :first-child,
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] > header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 0 !important;
+  flex-shrink: 0 !important;
+  padding: 0 1rem 0.35rem !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--bst-border) !important;
+  background: transparent !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] > :first-child h1,
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] > :first-child h2,
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] > :first-child p,
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] > header h1,
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] > header h2 {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  text-align: center !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  color: var(--bst-muted) !important;
+  line-height: 1.35 !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) #bst-profile-dialog {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) [data-testid="stForm"] {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] [data-testid="stCaptionContainer"] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] [data-testid="stCaptionContainer"] p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] [data-testid="stVerticalBlock"] {
+  gap: 0.75rem !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) [role="dialog"] [data-testid="stHorizontalBlock"] {
+  margin-top: auto !important;
+  padding-top: 0.25rem !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) input[type="text"],
+[data-testid="stDialog"]:has(#bst-profile-dialog) textarea {
+  border-radius: var(--bst-radius-sm) !important;
+  border: 1px solid var(--bst-border-strong) !important;
+  background: var(--bst-surface) !important;
+  font-size: 0.9rem !important;
+}
+
+/* Textarea labels (global.css hides them app-wide) */
+[data-testid="stDialog"]:has(#bst-profile-dialog) div[data-testid="stTextArea"] label,
+[data-testid="stDialog"]:has(#bst-personalization-dialog) div[data-testid="stTextArea"] label {
+  display: block !important;
+  margin: 0 0 0.35rem !important;
+  padding: 0 !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) div[data-testid="stTextArea"] label p,
+[data-testid="stDialog"]:has(#bst-personalization-dialog) div[data-testid="stTextArea"] label p {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: var(--bst-ink) !important;
+  line-height: 1.35 !important;
+}
+
+[data-testid="stDialog"]:has(#bst-profile-dialog) div[data-testid="stTextArea"] textarea,
+[data-testid="stDialog"]:has(#bst-personalization-dialog) div[data-testid="stTextArea"] textarea {
+  padding: 0.5rem 0.65rem !important;
+  line-height: 1.45 !important;
+}
+
+/* ── Floating profile chip (viewport-fixed, main area) ─────────────────────── */
+.stApp:has(#bst-profile-fab-anchor) .stElementContainer:has(#bst-profile-fab-anchor) {
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.stApp:has(#bst-profile-fab-anchor) .stElementContainer:has([class*="st-key-bst_profile_open"]),
+.stApp .stElementContainer.bst-profile-fab-docked {
+  position: fixed !important;
+  top: 0.75rem !important;
+  right: 1rem !important;
+  left: auto !important;
+  bottom: auto !important;
+  z-index: 100002 !important;
+  width: auto !important;
+  max-width: min(16rem, calc(100vw - 2rem)) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: auto !important;
+}
+
+.stApp [class*="st-key-bst_profile_open"] {
+  margin: 0 !important;
+}
+
+.stApp [class*="st-key-bst_profile_open"] .stButton > button,
+.stApp [class*="st-key-bst_profile_open"] [data-testid="baseButton-secondary"] {
+  justify-content: flex-start !important;
+  gap: 0.45rem !important;
+  padding: 0.5rem 0.85rem !important;
+  font-size: 0.86rem !important;
+  font-weight: 600 !important;
+  min-height: 2.25rem !important;
+  text-align: left !important;
+  border-radius: var(--bst-radius-pill) !important;
+  background: var(--bst-surface-elevated) !important;
+  border: 1px solid var(--bst-border) !important;
+  box-shadow: var(--bst-shadow-md) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.stApp [class*="st-key-bst_profile_open"] .stButton > button:hover,
+.stApp [class*="st-key-bst_profile_open"] [data-testid="baseButton-secondary"]:hover {
+  border-color: var(--bst-border-strong) !important;
+  background: var(--bst-surface) !important;
+  box-shadow: var(--bst-shadow-lg) !important;
+}
+
+/* 프로필 FAB: 커스텀 ::before 아바타 없음 (아이콘은 st.button icon 사용) */
+.stApp [class*="st-key-bst_profile_open"] .stButton > button::before,
+.stApp [class*="st-key-bst_profile_open"] [data-testid="baseButton-secondary"]::before,
+.stApp [class*="st-key-bst_profile_open"] [data-testid="stBaseButton-secondary"]::before {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  mask: none !important;
+  -webkit-mask: none !important;
+}
+
+/* Material account_circle — 프로필 톤으로 살짝 묻은 색 */
+.stApp [class*="st-key-bst_profile_open"] .stButton > button svg,
+.stApp [class*="st-key-bst_profile_open"] [data-testid="baseButton-secondary"] svg {
+  color: var(--bst-muted) !important;
+  fill: currentColor !important;
+}

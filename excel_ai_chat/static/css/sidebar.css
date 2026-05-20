@@ -714,3 +714,5 @@ html[data-theme="dark"]
   background: rgba(248, 113, 113, 0.14) !important;
   border-color: rgba(248, 113, 113, 0.35) !important;
 }
+
+/* Personalization sidebar + dialog → personalization.css */

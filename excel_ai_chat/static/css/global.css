@@ -271,3 +271,4 @@ section[data-testid="stMain"]:has(#bst-file-manager-page)
 div[data-testid="stTextArea"] textarea:focus-visible {
   outline: none !important;
 }
+
