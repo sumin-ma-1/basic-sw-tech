@@ -705,10 +705,12 @@ section[data-testid="stMain"]:has(#bst-file-manager-page)
   justify-content: space-between;
   gap: 1rem;
   margin: 0 0 0.75rem !important;
+  overflow: visible;
 }
 
 .bst-merge-head__text {
   min-width: 0;
+  overflow: visible;
 }
 
 .bst-merge-head__title {
@@ -746,37 +748,6 @@ section[data-testid="stMain"]:has(#bst-file-manager-page)
   color: var(--bst-primary);
   background: var(--bst-accent-soft);
   border-color: rgba(13, 148, 136, 0.28);
-}
-
-.bst-merge-tip {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 0.75rem 1.25rem;
-  margin: 0 0 1rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--bst-border);
-  border-radius: var(--bst-radius-md);
-  background: linear-gradient(135deg, var(--bst-accent-soft) 0%, var(--bst-surface-elevated) 70%);
-}
-
-.bst-merge-tip .bst-fm-merge-hint {
-  margin: 0;
-  flex-shrink: 0;
-}
-
-.bst-merge-tip__list {
-  margin: 0;
-  padding: 0 0 0 1.1rem;
-  flex: 1 1 12rem;
-  min-width: 10rem;
-  font-size: 0.88rem;
-  color: var(--bst-muted);
-  line-height: 1.55;
-}
-
-.bst-merge-tip__list li {
-  margin: 0.15rem 0;
 }
 
 .bst-merge-empty {
@@ -832,19 +803,25 @@ section[data-testid="stMain"]:has(#bst-file-manager-page)
   margin-top: 0 !important;
 }
 
-.bst-merge-step__badge {
+.bst-merge-step__icon {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.65rem;
-  height: 1.65rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--bst-primary-ink);
-  background: var(--bst-primary);
-  border-radius: var(--bst-radius-pill);
-  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  margin-top: 0.05rem;
+  color: var(--bst-accent);
+  background: var(--bst-accent-soft);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  border-radius: var(--bst-radius-sm);
+  line-height: 0;
+}
+
+.bst-merge-step__icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  display: block;
 }
 
 .bst-merge-step__title {
@@ -882,6 +859,190 @@ section[data-testid="stMain"]:has(#bst-file-manager-page):has(#bst-fm-merge-pane
 section[data-testid="stMain"]:has(#bst-file-manager-page):has(#bst-fm-merge-panel)
   div[data-testid="stTextInput"] {
   margin-bottom: 0.45rem !important;
+}
+
+/* Merge tab — multiselect / inputs: slate–indigo (distinct from teal Run merge) */
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]
+  [data-baseweb="tag"],
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]
+  span[data-baseweb="tag"] {
+  background-color: var(--bst-fm-field-tag-bg) !important;
+  border: 1px solid var(--bst-fm-field-tag-border) !important;
+  color: var(--bst-fm-field-tag-ink) !important;
+  border-radius: 6px !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]
+  [data-baseweb="tag"]
+  span,
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]
+  [data-baseweb="tag"]
+  p {
+  color: inherit !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]
+  [data-baseweb="tag"]
+  svg,
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]
+  [data-baseweb="tag"]
+  [aria-label="Close tag"]
+  svg {
+  fill: var(--bst-fm-field-tag-ink) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]
+  [data-baseweb="select"]
+  > div,
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]
+  > div
+  > div {
+  background-color: var(--bst-fm-field-bg) !important;
+  border: 1px solid var(--bst-fm-field-border-strong) !important;
+  border-radius: 8px !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]:hover
+  [data-baseweb="select"]
+  > div,
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]:hover
+  > div
+  > div {
+  border-color: #818cf8 !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]:focus-within
+  [data-baseweb="select"]
+  > div,
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]:focus-within
+  > div
+  > div {
+  border-color: var(--bst-fm-field-focus) !important;
+  box-shadow: 0 0 0 2px var(--bst-fm-field-focus-soft) !important;
+}
+
+/* Merge tab — text inputs (sheet, output filename) */
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  div[data-testid="stTextInput"]
+  [data-baseweb="input"] {
+  background-color: var(--bst-fm-field-bg) !important;
+  border: 1px solid var(--bst-fm-field-border-strong) !important;
+  border-radius: 8px !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  div[data-testid="stTextInput"]:hover
+  [data-baseweb="input"] {
+  border-color: #818cf8 !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  div[data-testid="stTextInput"]
+  [data-baseweb="input"]
+  input {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--bst-ink) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  div[data-testid="stTextInput"]:focus-within
+  [data-baseweb="input"] {
+  border-color: var(--bst-fm-field-focus) !important;
+  box-shadow: 0 0 0 2px var(--bst-fm-field-focus-soft) !important;
+}
+
+/* Fallback: native input when BaseWeb wrapper is absent */
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  div[data-testid="stTextInput"]:not(:has([data-baseweb="input"]))
+  input {
+  background-color: var(--bst-fm-field-bg) !important;
+  border: 1px solid var(--bst-fm-field-border-strong) !important;
+  border-radius: 8px !important;
+  color: var(--bst-ink) !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  div[data-testid="stTextInput"]:not(:has([data-baseweb="input"])):focus-within
+  input {
+  border-color: var(--bst-fm-field-focus) !important;
+  box-shadow: 0 0 0 2px var(--bst-fm-field-focus-soft) !important;
+  outline: none !important;
+}
+
+html[data-theme="dark"]
+  section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]:hover
+  [data-baseweb="select"]
+  > div,
+html[data-theme="dark"]
+  section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  [data-testid="stMultiSelect"]:hover
+  > div
+  > div,
+html[data-theme="dark"]
+  section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="tab-panel"]:has(#bst-fm-merge-panel)
+  div[data-testid="stTextInput"]:hover
+  [data-baseweb="input"] {
+  border-color: #818cf8 !important;
+}
+
+/* Dropdown portal is outside tab-panel — scope to File Manager page only */
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="popover"]
+  li[data-baseweb="option"][aria-selected="true"],
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="menu"]
+  li[aria-selected="true"] {
+  background-color: var(--bst-fm-field-menu-active) !important;
+  color: var(--bst-fm-field-tag-ink) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="popover"]
+  li[data-baseweb="option"]:hover,
+section[data-testid="stMain"]:has(#bst-file-manager-page)
+  [data-baseweb="menu"]
+  li:hover {
+  background-color: var(--bst-surface-2) !important;
+  color: var(--bst-ink) !important;
 }
 
 section[data-testid="stMain"]:has(#bst-file-manager-page):has(#bst-fm-merge-panel)
@@ -965,7 +1126,7 @@ section[data-testid="stMain"]:has(#bst-file-manager-page)
   overflow: hidden !important;
 }
 
-/* Merge tab — hover tooltip for "How merge works" */
+/* Merge tab — "How merge works" popover on Merge title hover */
 .bst-fm-merge-hint {
   position: relative;
   display: inline-block;
@@ -973,14 +1134,37 @@ section[data-testid="stMain"]:has(#bst-file-manager-page)
   z-index: 5;
 }
 
-.bst-fm-merge-hint__trigger {
-  font-size: 1.12rem;
-  font-weight: 500;
-  color: var(--bst-accent);
+.bst-fm-merge-hint--on-title {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.bst-fm-merge-hint--on-title .bst-merge-head__title {
+  display: inline-block;
+  margin: 0 !important;
+  padding: 0 0 0.12rem !important;
   cursor: help;
-  border-bottom: 1px dashed var(--bst-accent);
-  padding-bottom: 0.1rem;
+  border-bottom: 1px dashed var(--bst-border-strong);
+  transition: color var(--bst-transition), border-color var(--bst-transition);
   outline: none;
+}
+
+.bst-fm-merge-hint--on-title:hover .bst-merge-head__title,
+.bst-fm-merge-hint--on-title:focus-within .bst-merge-head__title {
+  color: var(--bst-accent) !important;
+  border-bottom-color: var(--bst-accent);
+}
+
+.bst-fm-merge-hint__list {
+  margin: 0.55rem 0 0;
+  padding: 0 0 0 1.1rem;
+  font-size: 0.88rem;
+  color: var(--bst-muted);
+  line-height: 1.5;
+}
+
+.bst-fm-merge-hint__list li {
+  margin: 0.2rem 0;
 }
 
 .bst-fm-merge-hint__popover {

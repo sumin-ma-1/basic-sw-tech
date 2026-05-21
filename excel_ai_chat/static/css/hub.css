@@ -887,6 +887,234 @@ section[data-testid="stMain"]:has(#bst-hub-excel-mode)
   max-width: min(100%, var(--bst-hub-chat-bubble-max)) !important;
 }
 
+/* ── Excel file badges (above chat input, inside composer area) ────────────── */
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  div[data-testid="stElementContainer"]:has(#bst-excel-attached-bar) {
+  margin: 0 0 0.28rem !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Pending files row (sibling of row marker — not inner badge+× row) */
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  div[data-testid="stElementContainer"]:has(#bst-excel-file-badges-row)
+  + div[data-testid="stElementContainer"]
+  [data-testid="stHorizontalBlock"] {
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  margin: 0 0 0.35rem !important;
+  padding: 0 0.15rem !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  div[data-testid="stElementContainer"]:has(#bst-excel-file-badges-row)
+  + div[data-testid="stElementContainer"]
+  [data-testid="stHorizontalBlock"]
+  > [data-testid="column"] {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: max-content !important;
+}
+
+/* One chip shell per file: bordered row wraps icon + text + close (inside border) */
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [data-testid="stHorizontalBlock"] {
+  display: inline-flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 0.3rem !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  padding: 0.28rem 0.32rem 0.28rem 0.38rem !important;
+  border: 1px solid var(--bst-border-strong) !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--bst-ink) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell--staged)
+  [data-testid="stHorizontalBlock"] {
+  border-style: dashed !important;
+  opacity: 0.96;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [data-testid="stHorizontalBlock"]
+  > [data-testid="column"]:first-child {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [data-testid="stHorizontalBlock"]
+  > [data-testid="column"]:nth-child(2) {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 10rem !important;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [data-testid="stHorizontalBlock"]
+  > [data-testid="column"]:last-child {
+  flex: 0 0 1.45rem !important;
+  width: 1.45rem !important;
+  min-width: 1.45rem !important;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  div[data-testid="stElementContainer"]:has(.bst-excel-file-chip-shell) {
+  width: fit-content !important;
+  max-width: 100% !important;
+}
+
+/* Library icons at chip size (same SVG/colors as File Manager Library) */
+.bst-excel-file-chip__icon.bst-lib-card__icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 8px;
+}
+
+.bst-excel-file-chip__icon.bst-lib-card__icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.bst-excel-file-chip__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.06rem;
+  min-width: 0;
+}
+
+.bst-excel-file-chip__name {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bst-excel-file-chip__kind {
+  font-size: 0.64rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--bst-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_staged_"]
+  .stButton
+  > button,
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_saved_"]
+  .stButton
+  > button,
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_staged_"]
+  [data-testid^="stBaseButton"],
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_saved_"]
+  [data-testid^="stBaseButton"] {
+  width: 1.4rem !important;
+  height: 1.4rem !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: var(--bst-muted) !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 6px !important;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_staged_"]
+  .stButton
+  > button:hover,
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_saved_"]
+  .stButton
+  > button:hover,
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_staged_"]
+  [data-testid^="stBaseButton"]:hover,
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_saved_"]
+  [data-testid^="stBaseButton"]:hover {
+  color: var(--bst-ink) !important;
+  background: var(--bst-surface-2) !important;
+}
+
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_staged_"]
+  .stButton
+  > button
+  svg,
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_saved_"]
+  .stButton
+  > button
+  svg,
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_staged_"]
+  [data-testid^="stBaseButton"]
+  svg,
+section[data-testid="stMain"]:has(#bst-excel-composer)
+  [data-testid="column"]:has(.bst-excel-file-chip-shell)
+  [class*="st-key-excel_rm_saved_"]
+  [data-testid^="stBaseButton"]
+  svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+/* Code confirmation + analysis widgets inside assistant bubble */
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(#bst-excel-code-confirm)
+  [data-testid="stAlert"],
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(#bst-excel-code-confirm)
+  [data-testid="stCode"] {
+  max-width: 100% !important;
+}
+
+section[data-testid="stMain"]:has(#bst-hub-chat-styling-root)
+  [data-testid="stChatMessage"]:has(#bst-excel-code-confirm)
+  .stButton
+  > button[kind="primary"] {
+  margin-top: 0.35rem !important;
+}
+
 /* ── Excel suggestion pills (st.pills key=excel_suggest_pill) ──────────────── */
 /* [허브-Excel] render: _render_suggest_chips() → app.py
    Streamlit 1.57 실제 DOM 구조:

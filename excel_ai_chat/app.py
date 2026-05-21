@@ -82,6 +82,7 @@ _ACTIVE_CHAT_ID_EXCEL = "active_excel_chat_id"
 # chrome before messages are inside the themed thread; hub bubble CSS keys off #bst-hub-chat-styling-root).
 _BST_PENDING_CHAT_GEN = "_bst_pending_chat_gen"
 _BST_PENDING_EXCEL_GEN = "_bst_pending_excel_gen"
+_BST_PENDING_EXCEL_EXEC = "_bst_pending_excel_exec"
 _BST_EXCEL_CODE_PENDING = "_bst_excel_code_pending"
 _BST_EXCEL_EXEC_ACTION = "_bst_excel_exec_action"
 _EXCEL_FILES_BY_CHAT = "_excel_files_by_chat"
@@ -264,7 +265,9 @@ def _purge_hub_widget_keys() -> None:
             continue
         if (
             key in drop
-            or key.startswith(("hub_composer", "hub_chat_", "excel_pending_uploader_"))
+            or key.startswith(
+                ("hub_composer", "hub_chat_", "excel_pending_uploader_", "excel_rm_")
+            )
         ):
             del st.session_state[key]
 
@@ -409,6 +412,7 @@ def _start_new_chat(mode: str) -> None:
     clear_last_active_id(mode)
     st.session_state.pop(_BST_EXCEL_CODE_PENDING, None)
     st.session_state.pop(_BST_EXCEL_EXEC_ACTION, None)
+    st.session_state.pop(_BST_PENDING_EXCEL_EXEC, None)
     st.session_state.nav_page = NAV_HUB
     if mode == MODE_EXCEL:
         _clear_excel_pending_files()
@@ -435,6 +439,7 @@ def _load_chat_into_session(mode: str, chat_id: str) -> None:
         st.session_state.chat_input_counter += 1
     st.session_state.pop(_BST_EXCEL_CODE_PENDING, None)
     st.session_state.pop(_BST_EXCEL_EXEC_ACTION, None)
+    st.session_state.pop(_BST_PENDING_EXCEL_EXEC, None)
     _purge_hub_widget_keys()
 
 
@@ -781,6 +786,34 @@ def _excel_file_kind_label(name: str) -> str:
     return ext.lstrip(".").upper() or "FILE"
 
 
+def _excel_file_kind_description(name: str) -> str:
+    """Human-readable file category shown under the filename on pending chips."""
+    ext = Path(name).suffix.lower()
+    if ext in {".xlsx", ".xlsm", ".xls", ".csv"}:
+        return "Spreadsheet"
+    if ext in {".ppt", ".pptx"}:
+        return "Presentation"
+    if ext in {".doc", ".docx"}:
+        return "Document"
+    if ext == ".pdf":
+        return "PDF"
+    if ext in {".txt", ".md"}:
+        return "Text file"
+    return "File"
+
+
+def _excel_file_lib_icon_key(name: str) -> str:
+    """Same icon keys as File Manager Library rows (_fm_library_icon_key)."""
+    ext = Path(name).suffix.lower()
+    if ext == ".csv":
+        return "csv"
+    if ext in {".xlsx", ".xlsm"}:
+        return "xlsx"
+    if ext == ".xls":
+        return "xls"
+    return "file"
+
+
 def _excel_attachments_html(
     files: dict[str, pd.DataFrame],
     *,
@@ -877,9 +910,10 @@ def _render_excel_message_attachments(names: list[str]) -> None:
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-def _pending_remove_widget_key(name: str) -> str:
+def _attached_remove_widget_key(name: str, *, staged: bool) -> str:
     safe = re.sub(r"[^a-zA-Z0-9_]", "_", name)
-    return f"excel_rm_pending_{safe[:48]}"
+    prefix = "excel_rm_staged" if staged else "excel_rm_saved"
+    return f"{prefix}_{safe[:48]}"
 
 
 def _remove_excel_pending_file(name: str) -> None:
@@ -888,51 +922,94 @@ def _remove_excel_pending_file(name: str) -> None:
     _set_excel_pending_files(pending)
 
 
-def _excel_pending_chip_html(name: str, df: pd.DataFrame) -> str:
-    kind = _excel_file_kind_label(name)
-    kind_cls = _excel_file_kind_class(name)
+def _remove_excel_committed_file(name: str) -> None:
+    chat_id = _get_active_chat_id(MODE_EXCEL)
+    if not chat_id:
+        return
+    files = dict(_excel_files_for_chat(chat_id))
+    if name not in files:
+        return
+    del files[name]
+    _sync_excel_files_to_disk(chat_id, files)
+    _excel_sync_spreadsheet_context(files)
+
+
+def _excel_attached_chip_icon_html(name: str) -> str:
+    icon_key = _excel_file_lib_icon_key(name)
     return (
-        f'<div class="bst-excel-pending-chip bst-excel-pending-chip--{kind_cls}">'
-        f'<span class="bst-excel-pending-chip__icon" aria-hidden="true">'
-        f"{html.escape(kind)}</span>"
-        f'<span class="bst-excel-pending-chip__name" title="{html.escape(name)}">'
-        f"{html.escape(name)}</span>"
-        f'<span class="bst-excel-pending-chip__meta">'
-        f"{len(df):,} rows</span>"
-        f"</div>"
+        f'<span class="bst-excel-file-chip__icon bst-lib-card__icon '
+        f'bst-lib-card__icon--{icon_key}" aria-hidden="true">'
+        f"{_FM_LIB_ICON_SVG[icon_key]}</span>"
     )
 
 
-def _render_excel_pending_inbox() -> None:
-    """Staged files inside the composer shell until the user presses Enter."""
+def _excel_attached_chip_body_html(name: str, df: pd.DataFrame) -> str:
+    title = html.escape(f"{name} — {len(df):,} rows")
+    return (
+        f'<span class="bst-excel-file-chip__body" title="{title}">'
+        f'<span class="bst-excel-file-chip__name">{html.escape(name)}</span>'
+        f'<span class="bst-excel-file-chip__kind">'
+        f"{html.escape(_excel_file_kind_description(name))}</span>"
+        f"</span>"
+    )
+
+
+def _excel_attached_file_items() -> list[tuple[str, pd.DataFrame, bool]]:
+    """(name, dataframe, staged) — staged pending send; saved = committed to chat."""
+    pending = _excel_pending_files()
+    committed = _excel_files()
+    items: list[tuple[str, pd.DataFrame, bool]] = []
+    for name in sorted(pending.keys()):
+        items.append((name, pending[name], True))
+    for name in sorted(committed.keys()):
+        if name not in pending:
+            items.append((name, committed[name], False))
+    return items
+
+
+def _render_excel_attached_files_bar() -> None:
+    """Compact pending-file badges directly above the Excel chat input."""
     pending = _excel_pending_files()
     if not pending:
         return
-    st.markdown('<span id="bst-excel-pending-root" aria-hidden="true"></span>', unsafe_allow_html=True)
+    items = [(name, pending[name], True) for name in sorted(pending.keys())]
     st.markdown(
-        '<div class="bst-excel-composer-inbox"><div class="bst-excel-composer-inbox__grid">',
+        '<span id="bst-excel-attached-bar" aria-hidden="true"></span>'
+        '<span id="bst-excel-file-badges-row" aria-hidden="true"></span>',
         unsafe_allow_html=True,
     )
-    names = sorted(pending.keys())
-    for row_start in range(0, len(names), 4):
-        batch = names[row_start : row_start + 4]
-        cols = st.columns(len(batch))
-        for col, name in zip(cols, batch):
-            with col:
-                st.markdown(
-                    f'<div class="bst-excel-pending-chip-wrap">'
-                    f"{_excel_pending_chip_html(name, pending[name])}</div>",
-                    unsafe_allow_html=True,
-                )
+    cols = st.columns(len(items), gap="small", vertical_alignment="center")
+    for col, (name, df, staged) in zip(cols, items):
+        with col:
+            shell_cls = "bst-excel-file-chip-shell"
+            if staged:
+                shell_cls += " bst-excel-file-chip-shell--staged"
+            st.markdown(
+                f'<span class="{shell_cls}" aria-hidden="true"></span>',
+                unsafe_allow_html=True,
+            )
+            icon_c, body_c, rm_c = st.columns(
+                [0.38, 1, 0.28],
+                gap="xxsmall",
+                vertical_alignment="center",
+            )
+            with icon_c:
+                st.markdown(_excel_attached_chip_icon_html(name), unsafe_allow_html=True)
+            with body_c:
+                st.markdown(_excel_attached_chip_body_html(name, df), unsafe_allow_html=True)
+            with rm_c:
                 if st.button(
-                    "×",
-                    key=_pending_remove_widget_key(name),
+                    "",
+                    icon=":material/close:",
+                    key=_attached_remove_widget_key(name, staged=staged),
                     type="tertiary",
                     help=f"Remove {name}",
                 ):
-                    _remove_excel_pending_file(name)
+                    if staged:
+                        _remove_excel_pending_file(name)
+                    else:
+                        _remove_excel_committed_file(name)
                     st.rerun()
-    st.markdown("</div></div>", unsafe_allow_html=True)
 
 
 _COMPOSER_BIND_JS = Path(__file__).resolve().parent / "static" / "js" / "composer_bind.js"
@@ -963,8 +1040,8 @@ def _render_excel_composer_row(
     Pending blocks live in the composer shell; clip opens the file explorer via hidden uploader.
     Returns (chat_input value, True if new files were staged and caller should rerun).
     """
+    _render_excel_attached_files_bar()
     st.markdown('<span id="bst-excel-composer"></span>', unsafe_allow_html=True)
-    _render_excel_pending_inbox()
 
     uploaded = st.file_uploader(
         "Attach",
@@ -1176,8 +1253,8 @@ def _render_excel_downloads() -> None:
             )
 
 
-def _render_excel_code_confirmation() -> None:
-    """Show proposed Python + summary; Run / Cancel set _BST_EXCEL_EXEC_ACTION and rerun."""
+def _render_excel_code_confirmation(model: str, temperature: float) -> None:
+    """Proposed Python inside the assistant bubble; Run queues execution on next pass."""
     proposal = st.session_state.get(_BST_EXCEL_CODE_PENDING)
     if not proposal:
         return
@@ -1198,15 +1275,20 @@ def _render_excel_code_confirmation() -> None:
     with run_col:
         if st.button("Run analysis", type="primary", key="bst_excel_run_code", use_container_width=True):
             st.session_state[_BST_EXCEL_EXEC_ACTION] = "run"
+            st.session_state[_BST_PENDING_EXCEL_EXEC] = (model, temperature)
             st.rerun()
     with cancel_col:
         if st.button("Cancel", type="secondary", key="bst_excel_cancel_code", use_container_width=True):
             st.session_state[_BST_EXCEL_EXEC_ACTION] = "cancel"
+            st.session_state[_BST_PENDING_EXCEL_EXEC] = (model, temperature)
             st.rerun()
 
 
-def _excel_handle_exec_action(model: str, temperature: float) -> None:
-    """Process Run / Cancel from the code confirmation panel."""
+def _hub_complete_pending_excel_exec(model: str, temperature: float) -> None:
+    """Run or cancel approved code inside the assistant bubble (after Run analysis)."""
+    if _BST_PENDING_EXCEL_EXEC not in st.session_state:
+        return
+    st.session_state.pop(_BST_PENDING_EXCEL_EXEC, None)
     action = st.session_state.pop(_BST_EXCEL_EXEC_ACTION, None)
     if not action:
         return
@@ -1234,7 +1316,7 @@ def _excel_handle_exec_action(model: str, temperature: float) -> None:
                 st.session_state[_BST_EXCEL_CODE_PENDING] = outcome
                 slot.empty()
                 st.rerun()
-            reply = str(outcome)
+            reply = str(outcome).strip() or "*(Analysis finished with no text output.)*"
         except Exception as e:  # noqa: BLE001
             reply = f"**Error**\n\n{e}"
         finally:
@@ -1255,35 +1337,35 @@ def _hub_complete_pending_excel_generation(model: str, temperature: float) -> No
     base = st.session_state.ollama_base
     api_messages = _excel_api_messages_built()
 
-    slot = st.empty()
-    slot.markdown(_waiting_html(), unsafe_allow_html=True, width="content")
-    try:
-        response = excel_first_model_response(
-            base,
-            model,
+    with _hub_chat_message("assistant"):
+        slot = st.empty()
+        slot.markdown(_waiting_html(), unsafe_allow_html=True, width="content")
+        try:
+            response = excel_first_model_response(
+                base,
+                model,
+                api_messages,
+                temperature=temperature,
+            )
+        except Exception as e:  # noqa: BLE001
+            slot.empty()
+            _append_excel_assistant_reply(f"**Error**\n\n{e}", model, temperature)
+            st.rerun()
+            return
+        slot.empty()
+
+        proposal = excel_proposal_from_response(
+            response,
             api_messages,
+            ollama_base=base,
+            model=model,
             temperature=temperature,
         )
-    except Exception as e:  # noqa: BLE001
-        slot.empty()
-        _append_excel_assistant_reply(f"**Error**\n\n{e}", model, temperature)
-        st.rerun()
-        return
-    slot.empty()
-
-    proposal = excel_proposal_from_response(
-        response,
-        api_messages,
-        ollama_base=base,
-        model=model,
-        temperature=temperature,
-    )
-    if proposal is None:
-        with _hub_chat_message("assistant"):
+        if proposal is None:
             _hub_message_body_markdown(response, role="assistant")
-        _append_excel_assistant_reply(response, model, temperature)
-        st.rerun()
-        return
+            _append_excel_assistant_reply(response, model, temperature)
+            st.rerun()
+            return
 
     st.session_state[_BST_EXCEL_CODE_PENDING] = proposal
     st.rerun()
@@ -1500,9 +1582,6 @@ def _render_hub(model: str, temperature: float) -> None:
         )
         _hub_drain_pending_chat_submit(model, temperature)
 
-        if mode == MODE_EXCEL:
-            _excel_handle_exec_action(model, temperature)
-
         if mode == MODE_CHAT:
             visible_msgs = st.session_state.messages
         else:
@@ -1539,8 +1618,11 @@ def _render_hub(model: str, temperature: float) -> None:
                             role=m["role"],
                             attached_files=names,
                         )
-                if mode == MODE_EXCEL and st.session_state.get(_BST_EXCEL_CODE_PENDING):
-                    _render_excel_code_confirmation()
+                if mode == MODE_EXCEL and st.session_state.get(_BST_PENDING_EXCEL_EXEC):
+                    _hub_complete_pending_excel_exec(model, temperature)
+                elif mode == MODE_EXCEL and st.session_state.get(_BST_EXCEL_CODE_PENDING):
+                    with _hub_chat_message("assistant"):
+                        _render_excel_code_confirmation(model, temperature)
                 elif mode == MODE_CHAT and st.session_state.get(_BST_PENDING_CHAT_GEN):
                     _hub_complete_pending_chat_generation(model, temperature)
                 elif mode == MODE_EXCEL and st.session_state.get(_BST_PENDING_EXCEL_GEN):
@@ -1718,14 +1800,31 @@ def _fm_outputs_header(count: int) -> None:
     )
 
 
+def _fm_merge_how_it_works_popover_html() -> str:
+    return (
+        "<strong>How merge works</strong>"
+        "<p>Rows with the same key columns are grouped. "
+        "Numeric columns are averaged; other columns keep the first value.</p>"
+        "<ul class=\"bst-fm-merge-hint__list\">"
+        "<li>Pick two or more files from your library</li>"
+        "<li>Choose key columns to match rows</li>"
+        "<li>Run merge — result appears in Outputs</li>"
+        "</ul>"
+    )
+
+
 def _fm_merge_header(file_count: int) -> None:
     ready = file_count >= 2
     status = "Ready to merge" if ready else "Need 2+ files"
     pill_cls = " bst-merge-head__pill--ready" if ready else ""
+    popover = _fm_merge_how_it_works_popover_html()
     st.markdown(
         '<div class="bst-merge-head bst-fm-section bst-fm-section--spaced-top">'
         '<div class="bst-merge-head__text">'
-        '<h3 class="bst-merge-head__title">Merge</h3>'
+        '<div class="bst-fm-merge-hint bst-fm-merge-hint--on-title">'
+        '<h3 class="bst-merge-head__title" tabindex="0">Merge</h3>'
+        f'<div class="bst-fm-merge-hint__popover" role="tooltip">{popover}</div>'
+        "</div>"
         '<p class="bst-merge-head__desc">'
         "Combine spreadsheets by key columns. Numeric values are averaged."
         "</p></div>"
@@ -1736,11 +1835,26 @@ def _fm_merge_header(file_count: int) -> None:
     )
 
 
-def _fm_merge_step(number: int, title: str, description: str) -> None:
-    first = " bst-merge-step--first" if number == 1 else ""
+_FM_MERGE_STEP_ICONS: dict[str, str] = {
+    "files": (
+        '<svg viewBox="0 0 24 24" aria-hidden="true">'
+        '<path fill="currentColor" d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-6 10H6v-2h8v2zm4-4H6v-2h12v2z"/>'
+        "</svg>"
+    ),
+    "keys": (
+        '<svg viewBox="0 0 24 24" aria-hidden="true">'
+        '<path fill="currentColor" d="M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>'
+        "</svg>"
+    ),
+}
+
+
+def _fm_merge_step(icon: str, title: str, description: str, *, first: bool = False) -> None:
+    first_cls = " bst-merge-step--first" if first else ""
+    icon_svg = _FM_MERGE_STEP_ICONS.get(icon, _FM_MERGE_STEP_ICONS["files"])
     st.markdown(
-        f'<div class="bst-merge-step{first}">'
-        f'<span class="bst-merge-step__badge" aria-hidden="true">{number}</span>'
+        f'<div class="bst-merge-step{first_cls}">'
+        f'<span class="bst-merge-step__icon" aria-hidden="true">{icon_svg}</span>'
         '<div class="bst-merge-step__text">'
         f'<h4 class="bst-merge-step__title">{html.escape(title)}</h4>'
         f'<p class="bst-merge-step__desc">{html.escape(description)}</p>'
@@ -1941,23 +2055,6 @@ def _render_fm_merge_tab(up: Path, out: Path) -> None:
     )
     _fm_merge_header(len(all_files))
 
-    st.markdown(
-        '<div class="bst-merge-tip">'
-        '<div class="bst-fm-merge-hint">'
-        '<span class="bst-fm-merge-hint__trigger" tabindex="0">How merge works</span>'
-        '<div class="bst-fm-merge-hint__popover" role="tooltip">'
-        "<strong>How merge works</strong>"
-        "<p>Rows with the same key columns are grouped. "
-        "Numeric columns are averaged; other columns keep the first value.</p>"
-        "</div></div>"
-        '<ul class="bst-merge-tip__list">'
-        "<li>Pick two or more files from your library</li>"
-        "<li>Choose key columns to match rows</li>"
-        "<li>Run merge — result appears in Outputs</li>"
-        "</ul></div>",
-        unsafe_allow_html=True,
-    )
-
     if len(all_files) < 2:
         st.markdown(
             '<div class="bst-merge-empty">'
@@ -1971,7 +2068,12 @@ def _render_fm_merge_tab(up: Path, out: Path) -> None:
             unsafe_allow_html=True,
         )
     else:
-        _fm_merge_step(1, "Select files", "Choose inputs and which sheet to read from each workbook.")
+        _fm_merge_step(
+            "files",
+            "Select files",
+            "Choose inputs and which sheet to read from each workbook.",
+            first=True,
+        )
         chosen = st.multiselect(
             "Files to merge",
             options=[p.name for p in all_files],
@@ -1998,7 +2100,11 @@ def _render_fm_merge_tab(up: Path, out: Path) -> None:
         except Exception as e:  # noqa: BLE001
             st.error(f"Could not read columns: {e}")
 
-        _fm_merge_step(2, "Keys & output", "Group rows by these columns; set the merged file name.")
+        _fm_merge_step(
+            "keys",
+            "Keys & output",
+            "Group rows by these columns; set the merged file name.",
+        )
         keys = st.multiselect(
             "Key columns",
             options=cols_preview,

@@ -64,6 +64,18 @@
   --bst-new-chat-pill-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
   --bst-new-chat-pill-hover-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
 
+  /* File Manager Merge tab — form fields (not Run merge primary) */
+  --bst-fm-field-border: #cbd5e1;
+  --bst-fm-field-border-strong: #94a3b8;
+  --bst-fm-field-bg: #f8fafc;
+  --bst-fm-field-ink: #475569;
+  --bst-fm-field-tag-bg: #e2e8f0;
+  --bst-fm-field-tag-border: #94a3b8;
+  --bst-fm-field-tag-ink: #334155;
+  --bst-fm-field-focus: #6366f1;
+  --bst-fm-field-focus-soft: rgba(99, 102, 241, 0.16);
+  --bst-fm-field-menu-active: rgba(99, 102, 241, 0.12);
+
   /* Sidebar history row (ghost item button) */
   --bst-hist-item-bg: transparent;
   --bst-hist-item-hover: rgba(15, 23, 42, 0.06);
@@ -119,6 +131,17 @@ html[data-theme="dark"] {
   --bst-new-chat-pill-hover-ink: #f8fafc;
   --bst-new-chat-pill-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   --bst-new-chat-pill-hover-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+
+  --bst-fm-field-border: #475569;
+  --bst-fm-field-border-strong: #64748b;
+  --bst-fm-field-bg: #1e293b;
+  --bst-fm-field-ink: #cbd5e1;
+  --bst-fm-field-tag-bg: #334155;
+  --bst-fm-field-tag-border: #64748b;
+  --bst-fm-field-tag-ink: #e2e8f0;
+  --bst-fm-field-focus: #818cf8;
+  --bst-fm-field-focus-soft: rgba(129, 140, 248, 0.22);
+  --bst-fm-field-menu-active: rgba(129, 140, 248, 0.18);
 
   --bst-hist-item-bg: transparent;
   --bst-hist-item-hover: rgba(255, 255, 255, 0.06);
