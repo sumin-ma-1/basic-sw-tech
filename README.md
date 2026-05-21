@@ -8,6 +8,21 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 ## 사용 화면 캡쳐
 
+### 메인 허브
+
+<img width="800" alt="메인 허브 화면" src="https://github.com/user-attachments/assets/2a80c598-40e3-4a81-8d1a-eb194ca2f9bf" />
+
+### 엑셀 에이전트 모드
+
+기본 엑셀 에이전트 페르소나를 적용하고, 사용자 선호 설정이 있는 경우 함께 반영합니다.
+
+<img width="800" alt="엑셀 에이전트 모드 화면" src="https://github.com/user-attachments/assets/620a4bee-3871-4512-974c-ae38d99a98df" />
+
+### 사용자 전용 페르소나 생성
+
+`balanced`, `professional`, `friendly` 프리셋 외에도 사용자 취향에 맞는 커스텀 페르소나를 생성할 수 있습니다.
+
+<img width="800" alt="사용자 전용 페르소나 생성 화면" src="https://github.com/user-attachments/assets/938cd542-b78a-40f8-b1c3-baf35c5fcce5" />
 
 ### 작업 파일 다운로드
 
