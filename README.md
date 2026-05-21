@@ -11,11 +11,11 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 ### 작업 파일 다운로드
 
-<img width="800" alt="작업 파일 다운로드 화면" src="https://github.com/user-attachments/assets/e53f5f7f-ce3d-4382-ad81-f2a3dc2159b2" />
+<img width="800" alt="다운로드 완료 화면" src="https://github.com/user-attachments/assets/05b78140-ca95-4885-88f7-5cae53e95cdb" />
 
 ### 다운로드 완료 화면
 
-<img width="800" alt="다운로드 완료 화면" src="https://github.com/user-attachments/assets/05b78140-ca95-4885-88f7-5cae53e95cdb" />
+<img width="800" alt="작업 파일 다운로드 화면" src="https://github.com/user-attachments/assets/e53f5f7f-ce3d-4382-ad81-f2a3dc2159b2" />
 
 ---
 
