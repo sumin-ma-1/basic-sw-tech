@@ -4,11 +4,18 @@ Welcome to my basic software technology!
 
 excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성, 저장 등을 할 수 있는 Streamlit 웹 UI입니다. 대화는 Markdown으로 보내거나 `outputs/` 아래에 저장합니다.
 
-## 사용 화면 녹화
+## 사용 화면 캡쳐lit 웹 UI입니다. 대화는 Markdown으로 보내거나 `outputs/` 아래에 저장합니다.
 
-업데이트 전 버전입니다.
+## 사용 화면 캡쳐
 
-<img width="1392" height="1080" alt="Usage demo — hub chat, Analyze Excel, and file merge" src="https://github.com/user-attachments/assets/3488e184-d82c-4c9e-867e-41f2905ff95f" />
+
+### 작업 파일 다운로드
+
+<img width="800" alt="작업 파일 다운로드 화면" src="https://github.com/user-attachments/assets/e53f5f7f-ce3d-4382-ad81-f2a3dc2159b2" />
+
+### 다운로드 완료 화면
+
+<img width="800" alt="다운로드 완료 화면" src="https://github.com/user-attachments/assets/05b78140-ca95-4885-88f7-5cae53e95cdb" />
 
 ---
 
