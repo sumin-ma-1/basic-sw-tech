@@ -12,7 +12,7 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 ### 엑셀 에이전트 모드
 
-기본 엑셀 에이전트 페르소나를 적용하고, 사용자 선호 설정이 있는 경우 함께 반영합니다.
+엑셀 전문가 페르소나를 기본 적용하고, 사용자 선호 설정이 있는 경우 함께 반영합니다.
 
 <img width="800" alt="엑셀 에이전트 모드 화면" src="https://github.com/user-attachments/assets/620a4bee-3871-4512-974c-ae38d99a98df" />
 
@@ -35,90 +35,6 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 ## 아키텍처 개요
 
 단일 Streamlit 앱(`excel_ai_chat/app.py`)이 UI·상태·라우팅을 담당하고, 도메인 로직은 패키지 모듈로 분리합니다. 외부 의존은 **Ollama HTTP API**와 **로컬 디스크**(`uploads/`, `outputs/`)입니다.
-
-### 화면·모드 라우팅
-
-| `session_state` | 값 | 화면 |
-|-----------------|-----|------|
-| `nav_page` | `hub` | 메인 허브(채팅 / Excel 분석) |
-| `nav_page` | `file_manager` | 파일 업로드·미리보기·병합 |
-| `hub_mode` | `chat` | 일반 Ollama 채팅 |
-| `hub_mode` | `excel` | 스프레드시트 첨부·분석·코드 실행 루프 |
-
-`main()`은 사이드바(Ollama·모델·채팅 기록)를 그린 뒤 `nav_page`에 따라 `_render_hub()` 또는 `_render_file_manager()`를 호출합니다.
-
-### Excel 모드 데이터 흐름
-
-1. **첨부**: 클립 → 숨김 `file_uploader` → `_EXCEL_PENDING_FILES` → 전송 시 `outputs/chats/<chat_id>/attachments/`에 병합 저장.
-2. **컨텍스트**: `prompts.build_spreadsheet_data_block()`으로 샘플이 담긴 숨김 user 메시지(`_hidden`)를 스레드에 삽입.
-3. **응답**: `excel_agent`가 Ollama 호출 → 응답의 ` ```python ` 블록 추출 → 사용자 **실행 확인** 후 `code_runner` 샌드박스 실행.
-4. **결과**: `result`가 DataFrame이면 `exports/`에 xlsx 저장·다운로드 버튼 표시.
-
-일반 채팅 모드는 `messages` + `chat_store`만 사용하며, Excel 첨부·코드 실행 경로는 타지 않습니다.
-
----
-
-## 디렉터리 구조
-
-```
-basic-sw-tech/
-├── excel_ai_chat/              # 애플리케이션 패키지
-│   ├── app.py                  # Streamlit 진입·UI·세션·라우팅 (단일 화면 오케스트레이션)
-│   ├── __main__.py             # `excel-ai-chat` → streamlit run app.py
-│   ├── theme.py                # CSS 번들을 <head>에 주입 (components.html)
-│   ├── paths.py                # repo_root, uploads_dir, outputs_dir, chats_dir
-│   ├── ollama_client.py        # Ollama /api/tags, /api/chat
-│   ├── prompts.py              # 시스템 프롬프트·스프레드시트 블록 (PROMPT_VERSION)
-│   ├── chat_store.py           # 대화 JSON CRUD (outputs/chats/*.json)
-│   ├── excel_chat_files.py     # 대화별 attachments/ · exports/
-│   ├── excel_agent.py          # Excel 채팅 + 코드 제안·실행 루프
-│   ├── code_runner.py          # pandas 샌드박스 실행·블록 파싱
-│   ├── excel_tools.py          # read_table, merge_mean_by_keys (파일 관리자 병합)
-│   ├── history_ui.py           # 사이드바 기록 행·메뉴·호버 JS
-│   ├── export_utils.py         # xlsx 바이트·다운로드 항목
-│   └── static/
-│       ├── favicon.png
-│       └── css/
-│           ├── variables.css   # 디자인 토큰 (:root)
-│           ├── global.css      # 공통 버튼·입력 등
-│           ├── sidebar.css     # 사이드바·채팅 기록·New chat/Clear all
-│           ├── hub.css         # 허브·Excel 컴포저·제안 pills·메시지
-│           ├── file_manager.css
-│           ├── hub_animations.css
-│           ├── waiting.css     # 응답 대기 애니메이션
-│           └── hub_theme.css   # (레거시) 단일 파일 시절 잔존 — theme.py는 미사용
-├── tests/                      # pytest (chat_store, code_runner, prompts, export)
-├── uploads/                    # 파일 관리자 업로드 (gitignore)
-├── outputs/                    # 병합 결과·저장 대화 (gitignore)
-│   └── chats/
-│       ├── <uuid>.json         # 대화 메타·메시지
-│       └── <uuid>/
-│           ├── attachments/    # Excel 모드 첨부 시트
-│           └── exports/        # 분석 결과 xlsx
-├── .streamlit/config.toml      # 기본 포트 8502 등
-├── .env.example
-├── pyproject.toml
-└── requirements.txt
-```
-
----
-
-## 모듈 역할
-
-| 모듈 | 책임 |
-|------|------|
-| **app.py** | 페이지 설정, `session_state` 초기화, 사이드바, 허브/파일관리자 렌더, 채팅 전송·rerun, Excel 컴포저(클립·pending·`st.chat_input`), 환영/제안 칩 |
-| **theme.py** | `variables` → `global` → `sidebar` → `hub` → `file_manager` → `hub_animations` → `waiting` 순으로 CSS를 parent `document.head`에 주입 |
-| **chat_store.py** | `chat` / `excel` 모드별 대화 목록·저장·삭제·마지막 활성 ID |
-| **excel_chat_files.py** | 대화 워크스페이스, 첨부 로드/저장, export manifest |
-| **history_ui.py** | `render_history_row()`, 행 호버·활성 상태용 `components.html` JS |
-| **excel_agent.py** | Ollama 멀티턴 + 코드 블록 승인 대기(`ExcelCodeProposal`) + 재시도 라운드 |
-| **code_runner.py** | `execute_pandas_code`, 마크업/블록 추출 |
-| **excel_tools.py** | 파일 I/O·키 기준 병합 (파일 관리자 탭) |
-| **prompts.py** | `HUB_CHAT_SYSTEM`, `EXCEL_SYSTEM`, env 오버라이드 (`OLLAMA_SYSTEM_*`) |
-| **ollama_client.py** | httpx 기반 API 클라이언트 |
-| **export_utils.py** | DataFrame → xlsx, 안전한 파일명 |
-| **paths.py** | 저장 경로 단일 정의 |
 
 ---
 
@@ -184,7 +100,7 @@ python -m streamlit run excel_ai_chat/app.py
 
 Excel 코드 루프: `EXCEL_CODE_MAX_ROUNDS`(기본 3), `EXCEL_CODE_TIMEOUT` 초(기본 15).
 
-Python 실행 전 **코드 미리보기**, 요약, **Run analysis** / **Cancel** 버튼을 표시합니다.
+Python 실행 전 **코드 미리보기**, 요약, **Run analysis** / **Cancel** 버튼을 표시하여 선택 가능합니다.
 
 실행 결과 `result`가 DataFrame(또는 Series / 프레임 dict)이면 스레드 아래 **Download results (Excel)** 버튼이 나타나며, `outputs/chats/<chat_id>/exports/`에 저장됩니다.
 
