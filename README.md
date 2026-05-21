@@ -24,7 +24,7 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 ### 작업 파일 다운로드
 
-<img width="800" alt="다운로드 완료 화면" src="https://github.com/user-attachments/assets/05b78140-ca95-4885-88f7-5cae53e95cdb" />
+<img width="2466" height="1753" alt="Image" src="https://github.com/user-attachments/assets/b77dc5f2-e014-46aa-8123-8eeb28c24984" />
 
 ### 다운로드 완료 화면
 
