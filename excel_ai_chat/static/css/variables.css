@@ -41,18 +41,18 @@
   /* Same horizontal cap for user + assistant (assistant slightly under old 70rem) */
   --bst-hub-chat-bubble-max: min(96%, 66rem);
 
-  /* Hub Excel chip — teal-cyan (harmonizes with --bst-primary) */
-  --bst-excel-chip-bg-top: #f0fdfa;
-  --bst-excel-chip-bg-bottom: #ccfbf1;
-  --bst-excel-chip-border: #5eead4;
-  --bst-excel-chip-ink: #0f766e;
-  --bst-excel-chip-hover-bg: #99f6e4;
-  --bst-excel-chip-hover-border: #2dd4bf;
-  --bst-excel-chip-hover-ink: #115e59;
-  --bst-excel-chip-shadow: 0 1px 3px rgba(13, 148, 136, 0.14);
-  --bst-excel-chip-shadow-hover: 0 2px 8px rgba(13, 148, 136, 0.22);
+  /* Hub Excel Agent / exit chip — blue (matches Excel Expert sidebar badge) */
+  --bst-excel-chip-bg-top: #eff6ff;
+  --bst-excel-chip-bg-bottom: #dbeafe;
+  --bst-excel-chip-border: #93c5fd;
+  --bst-excel-chip-ink: #1d4ed8;
+  --bst-excel-chip-hover-bg: #bfdbfe;
+  --bst-excel-chip-hover-border: #60a5fa;
+  --bst-excel-chip-hover-ink: #1e40af;
+  --bst-excel-chip-shadow: 0 1px 3px rgba(37, 99, 235, 0.16);
+  --bst-excel-chip-shadow-hover: 0 2px 10px rgba(59, 130, 246, 0.28);
   --bst-excel-chip-lift: -2px;
-  --bst-excel-chip-lift-shadow: 0 4px 14px rgba(13, 148, 136, 0.24);
+  --bst-excel-chip-lift-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
 
   /* Sidebar “New chat” pill — soft slate (distinct from teal Excel chips) */
   --bst-new-chat-pill-bg: #f1f5f9;
@@ -101,15 +101,15 @@ html[data-theme="dark"] {
   --bst-chat-bubble-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
   --bst-hub-chat-bubble-max: min(96%, 66rem);
 
-  --bst-excel-chip-bg-top: rgba(45, 212, 191, 0.16);
-  --bst-excel-chip-bg-bottom: rgba(13, 148, 136, 0.14);
-  --bst-excel-chip-border: rgba(45, 212, 191, 0.48);
-  --bst-excel-chip-ink: #5eead4;
-  --bst-excel-chip-hover-bg: rgba(45, 212, 191, 0.26);
-  --bst-excel-chip-hover-border: #2dd4bf;
-  --bst-excel-chip-hover-ink: #ccfbf1;
-  --bst-excel-chip-shadow: 0 1px 4px rgba(13, 148, 136, 0.28);
-  --bst-excel-chip-shadow-hover: 0 2px 10px rgba(13, 148, 136, 0.35);
+  --bst-excel-chip-bg-top: rgba(30, 58, 138, 0.5);
+  --bst-excel-chip-bg-bottom: rgba(30, 64, 175, 0.38);
+  --bst-excel-chip-border: rgba(96, 165, 250, 0.5);
+  --bst-excel-chip-ink: #dbeafe;
+  --bst-excel-chip-hover-bg: rgba(59, 130, 246, 0.38);
+  --bst-excel-chip-hover-border: #60a5fa;
+  --bst-excel-chip-hover-ink: #eff6ff;
+  --bst-excel-chip-shadow: 0 1px 4px rgba(37, 99, 235, 0.32);
+  --bst-excel-chip-shadow-hover: 0 2px 12px rgba(59, 130, 246, 0.4);
 
   --bst-new-chat-pill-bg: #334155;
   --bst-new-chat-pill-border: #475569;

@@ -88,7 +88,7 @@ def system_prompt_for_mode(
 
     from excel_ai_chat.personalization import merge_system_with_personalization
 
-    return merge_system_with_personalization(base, personalization)
+    return merge_system_with_personalization(base, personalization, mode=mode)
 
 
 def build_ollama_messages(

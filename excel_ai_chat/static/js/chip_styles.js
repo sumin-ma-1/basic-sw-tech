@@ -10,13 +10,13 @@
 
   var pal = function () {
     return dark() ? {
-      bg:  'rgba(13,148,136,0.14)', bd: 'rgba(45,212,191,0.48)', fg: '#5eead4',
-      hbg: 'rgba(45,212,191,0.26)', hbd: '#2dd4bf',              hfg: '#ccfbf1',
-      sh:  '0 1px 4px rgba(13,148,136,.28)'
+      bg:  'rgba(30,64,175,0.38)', bd: 'rgba(96,165,250,0.5)', fg: '#dbeafe',
+      hbg: 'rgba(59,130,246,0.38)', hbd: '#60a5fa',             hfg: '#eff6ff',
+      sh:  '0 1px 4px rgba(37,99,235,.32)'
     } : {
-      bg:  '#ccfbf1', bd: '#5eead4', fg: '#0f766e',
-      hbg: '#99f6e4', hbd: '#2dd4bf', hfg: '#115e59',
-      sh:  '0 1px 3px rgba(13,148,136,.14)'
+      bg:  '#dbeafe', bd: '#93c5fd', fg: '#1d4ed8',
+      hbg: '#bfdbfe', hbd: '#60a5fa', hfg: '#1e40af',
+      sh:  '0 1px 3px rgba(37,99,235,.16)'
     };
   };
 
@@ -28,8 +28,8 @@
     var dk = dark();
 
     s(btn, 'background', dk
-      ? 'linear-gradient(180deg,rgba(45,212,191,.16) 0%,' + c.bg + ' 100%)'
-      : 'linear-gradient(180deg,#f0fdfa 0%,#ccfbf1 100%)');
+      ? 'linear-gradient(180deg,rgba(30,58,138,.5) 0%,' + c.bg + ' 100%)'
+      : 'linear-gradient(180deg,#eff6ff 0%,#dbeafe 100%)');
     s(btn, 'background-color', c.bg);
     s(btn, 'border',       '1px solid ' + c.bd);
     s(btn, 'color',        c.fg);
@@ -68,8 +68,8 @@
           s(btn, 'transform',  'translateY(-2px)');
           s(btn, 'box-shadow',
             '0 1px 0 rgba(255,255,255,.45) inset, ' +
-            '0 2px 8px rgba(13,148,136,.22), ' +
-            '0 4px 14px rgba(13,148,136,.24)');
+            '0 2px 10px rgba(59,130,246,.28), ' +
+            '0 4px 14px rgba(37,99,235,.28)');
         }
       });
 

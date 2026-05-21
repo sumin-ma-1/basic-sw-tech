@@ -15,9 +15,12 @@ from excel_ai_chat.personas import (
     BUILTIN_PERSONAS,
     CUSTOM_INSTRUCTIONS_ID,
     DEFAULT_PERSONA_ID,
+    EXCEL_EXPERT_PERSONA,
+    EXCEL_EXPERT_PERSONA_ID,
     PERSONA_NONE,
     CustomPersona,
     MAX_CUSTOM_PERSONAS,
+    PersonaTemplate,
     builtin_persona_ids,
     coerce_custom_personas,
     format_persona_label,
@@ -291,11 +294,88 @@ def _global_profile_lines(settings: PersonalizationSettings) -> list[str]:
     return lines
 
 
-def personalization_system_block(settings: PersonalizationSettings | None) -> str:
+def _persona_layer_lines(
+    label: str,
+    persona: PersonaTemplate | CustomPersona,
+) -> list[str]:
+    about, style = persona_fields(persona)
+    lines: list[str] = [f"- {label}: {persona.name}"]
+    if about.strip():
+        lines.append(f"<user_context>\n{about.strip()}\n</user_context>")
+    if style.strip():
+        lines.append(f"<response_preferences>\n{style.strip()}\n</response_preferences>")
+    return lines
+
+
+def _include_alpha_persona(settings: PersonalizationSettings) -> bool:
+    """User-selected sidebar persona as Alpha (skip default / excel_expert / inactive)."""
+    if not settings.is_active():
+        return False
+    selected = settings.selected_persona_id
+    if selected == EXCEL_EXPERT_PERSONA_ID:
+        return False
+    if is_custom_persona_id(selected, settings.custom_personas):
+        return True
+    return effective_builtin_id(selected) != DEFAULT_PERSONA_ID
+
+
+def _alpha_persona_layer(settings: PersonalizationSettings) -> list[str]:
+    if not _include_alpha_persona(settings):
+        return []
+    selected = settings.selected_persona_id
+    if is_custom_persona_id(selected, settings.custom_personas):
+        cp = settings.selected_custom_persona()
+        if cp is None:
+            return []
+        return _persona_layer_lines(
+            "Alpha persona (user-selected — tone and context; highest priority among personas)",
+            cp,
+        )
+    pid = effective_builtin_id(selected)
+    persona = resolve_persona(pid, settings.custom_personas)
+    if persona is None:
+        return []
+    return _persona_layer_lines(
+        "Alpha persona (user-selected — tone and context; highest priority among personas)",
+        persona,
+    )
+
+
+def _excel_expert_layer() -> list[str]:
+    return _persona_layer_lines(
+        "Excel Expert (mode — spreadsheet workflow; follow when compatible with Alpha above)",
+        EXCEL_EXPERT_PERSONA,
+    )
+
+
+def personalization_system_block(
+    settings: PersonalizationSettings | None,
+    *,
+    mode: str = "chat",
+) -> str:
     if settings is None:
         return ""
     global_lines = _global_profile_lines(settings)
-    persona_active = settings.is_active()
+    if mode == "excel":
+        alpha_lines = _alpha_persona_layer(settings)
+        excel_lines = _excel_expert_layer()
+        persona_lines = [*alpha_lines, *excel_lines]
+        persona_active = bool(persona_lines)
+    else:
+        persona_active = settings.is_active()
+        persona_lines = []
+        if persona_active:
+            _name, about, style = settings.resolved_instruction_fields()
+            persona_label = settings.active_persona_label()
+            if persona_label:
+                persona_lines.append(f"- Active persona: {persona_label}")
+            if about.strip():
+                persona_lines.append(f"<user_context>\n{about.strip()}\n</user_context>")
+            if style.strip():
+                persona_lines.append(
+                    f"<response_preferences>\n{style.strip()}\n</response_preferences>"
+                )
+
     if not global_lines and not persona_active:
         return ""
     parts: list[str] = [
@@ -303,16 +383,7 @@ def personalization_system_block(settings: PersonalizationSettings | None) -> st
         "with safety rules and app capabilities above):",
     ]
     parts.extend(global_lines)
-    if not persona_active:
-        return "\n".join(parts)
-    _name, about, style = settings.resolved_instruction_fields()
-    persona_label = settings.active_persona_label()
-    if persona_label:
-        parts.append(f"- Active persona: {persona_label}")
-    if about.strip():
-        parts.append(f"<user_context>\n{about.strip()}\n</user_context>")
-    if style.strip():
-        parts.append(f"<response_preferences>\n{style.strip()}\n</response_preferences>")
+    parts.extend(persona_lines)
     return "\n".join(parts)
 
 
@@ -334,12 +405,14 @@ def _strip_match_user_language_rules(base_system: str) -> str:
 def merge_system_with_personalization(
     base_system: str,
     settings: PersonalizationSettings | None,
+    *,
+    mode: str = "chat",
 ) -> str:
     base = (base_system or "").strip()
     lang = settings.default_language.strip() if settings else ""
     if lang:
         base = _strip_match_user_language_rules(base)
-    extra = personalization_system_block(settings).strip()
+    extra = personalization_system_block(settings, mode=mode).strip()
     if not extra:
         if not lang:
             return base
@@ -967,6 +1040,30 @@ def _profile_editor_dialog() -> None:
         st.rerun(scope="app")
 
 
+def _render_sidebar_excel_expert_badge() -> None:
+    """Small status badge when hub is in Excel analyze mode (not persisted persona)."""
+    if st.session_state.get("nav_page") != "hub":
+        return
+    if st.session_state.get("hub_mode") != "excel":
+        return
+    settings = _settings_from_session()
+    title_attr = ""
+    if _include_alpha_persona(settings):
+        label = settings.active_persona_label()
+        if label:
+            title_attr = (
+                f' title="Excel Expert (mode) + Alpha persona: {_html.escape(label)}"'
+            )
+    st.markdown(
+        f'<div class="bst-excel-expert-badge"{title_attr}>'
+        '<span class="bst-excel-expert-badge__led" aria-hidden="true"></span>'
+        '<span class="bst-excel-expert-badge__label">Excel Expert</span>'
+        "</div>"
+        '<span id="bst-excel-expert-badge-anchor" aria-hidden="true"></span>',
+        unsafe_allow_html=True,
+    )
+
+
 def _render_sidebar_personalization() -> None:
     _process_profile_save_pending()
     _process_persona_pending_actions()
@@ -976,6 +1073,7 @@ def _render_sidebar_personalization() -> None:
         '<span id="bst-sidebar-pers-anchor" aria-hidden="true"></span>',
         unsafe_allow_html=True,
     )
+    _render_sidebar_excel_expert_badge()
     _render_sidebar_builtin_presets()
     _render_sidebar_custom_personas()
     if st.session_state.get(_BST_PERSONA_MODAL_OPEN, False):

@@ -6,7 +6,6 @@ import html
 import io
 import json
 import re
-import shutil
 import time
 from contextlib import contextmanager
 from pathlib import Path
@@ -1581,6 +1580,18 @@ def _fm_file_size(path: Path) -> str:
     return f"{n / 1_048_576:.1f} MB"
 
 
+def _fm_spreadsheet_output_files(out_dir: Path) -> list[Path]:
+    """Merge outputs under outputs/ — exclude chats/, personalization.json, etc."""
+    return sorted(
+        [
+            p
+            for p in out_dir.iterdir()
+            if p.is_file() and p.suffix.lower() in _ALLOWED
+        ],
+        key=lambda p: p.name.lower(),
+    )
+
+
 _FM_LIB_ICON_SVG = {
     "csv": (
         '<svg viewBox="0 0 24 24" aria-hidden="true">'
@@ -2040,10 +2051,7 @@ def _render_fm_merge_tab(up: Path, out: Path) -> None:
                 except Exception as e:  # noqa: BLE001
                     st.error(str(e))
 
-    outs = sorted(
-        [p for p in out.iterdir() if p.is_file()],
-        key=lambda p: p.name.lower(),
-    )
+    outs = _fm_spreadsheet_output_files(out)
     st.markdown(
         '<hr class="bst-fm-sep bst-fm-merge-outputs-sep" aria-hidden="true">',
         unsafe_allow_html=True,
@@ -2207,11 +2215,8 @@ def _render_fm_outputs(outs: list[Path], out_dir: Path) -> None:
             use_container_width=True,
             key="fm_clear_outputs",
         ):
-            for p in list(out_dir.iterdir()):
-                if p.is_file():
-                    p.unlink()
-                elif p.is_dir():
-                    shutil.rmtree(p, ignore_errors=True)
+            for p in _fm_spreadsheet_output_files(out_dir):
+                p.unlink(missing_ok=True)
             st.success("Outputs cleared.")
             st.rerun()
     _fm_clear_all_style_hook()

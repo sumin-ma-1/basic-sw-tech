@@ -1,5 +1,86 @@
 /* personalization.css — sidebar presets + custom instructions modal */
 
+/* ── Sidebar: Excel Expert active badge (Excel hub mode only) ──────────────── */
+@keyframes bst-excel-expert-led-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow:
+      0 0 4px #60a5fa,
+      0 0 10px rgba(59, 130, 246, 0.75),
+      0 0 16px rgba(37, 99, 235, 0.35);
+  }
+  50% {
+    opacity: 0.72;
+    box-shadow:
+      0 0 2px #93c5fd,
+      0 0 6px rgba(59, 130, 246, 0.45),
+      0 0 10px rgba(37, 99, 235, 0.2);
+  }
+}
+
+.bst-excel-expert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.55rem;
+  padding: 0.28rem 0.62rem 0.28rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #1e40af;
+  background: linear-gradient(
+    135deg,
+    rgba(239, 246, 255, 0.95) 0%,
+    rgba(219, 234, 254, 0.88) 100%
+  );
+  border: 1px solid rgba(96, 165, 250, 0.55);
+  border-radius: var(--bst-radius-pill);
+  box-shadow:
+    0 1px 3px rgba(37, 99, 235, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.bst-excel-expert-badge__led {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #3b82f6;
+  animation: bst-excel-expert-led-pulse 2.1s ease-in-out infinite;
+}
+
+.bst-excel-expert-badge__label {
+  letter-spacing: 0.02em;
+  color: #1d4ed8;
+}
+
+section[data-testid="stSidebar"]:has(#bst-excel-expert-badge-anchor)
+  .stElementContainer:has(#bst-excel-expert-badge-anchor) {
+  margin-bottom: 0.1rem !important;
+}
+
+html[data-theme="dark"] .bst-excel-expert-badge {
+  color: #bfdbfe;
+  background: linear-gradient(
+    135deg,
+    rgba(30, 58, 138, 0.45) 0%,
+    rgba(30, 64, 175, 0.32) 100%
+  );
+  border-color: rgba(96, 165, 250, 0.42);
+  box-shadow:
+    0 1px 4px rgba(37, 99, 235, 0.28),
+    inset 0 1px 0 rgba(147, 197, 253, 0.08);
+}
+
+html[data-theme="dark"] .bst-excel-expert-badge__label {
+  color: #dbeafe;
+}
+
+html[data-theme="dark"] .bst-excel-expert-badge__led {
+  background: #60a5fa;
+}
+
 /* ── Sidebar: Personalization block ─────────────────────────────────────────── */
 section[data-testid="stSidebar"]:has(#bst-sidebar-pers-anchor) .stElementContainer:has(#bst-sidebar-pers-anchor) {
   margin-bottom: 0.15rem !important;

@@ -48,6 +48,23 @@ class CustomPersona:
         }
 
 
+EXCEL_EXPERT_PERSONA_ID = "excel_expert"
+
+# Applied automatically in Excel hub mode (not shown in sidebar presets).
+EXCEL_EXPERT_PERSONA = PersonaTemplate(
+    id=EXCEL_EXPERT_PERSONA_ID,
+    name="Excel Expert",
+    about_user=(
+        "User is analyzing spreadsheets (CSV/Excel) with attached files and optional code execution."
+    ),
+    response_style=(
+        "Spreadsheet specialist: precise with numbers, explain assumptions briefly, "
+        "prefer tables and clear steps. Use ```python with dfs when full data is needed; "
+        "never invent figures. Match the user's language unless profile language overrides."
+    ),
+    tooltip="Auto-applied in Analyze Excel mode",
+)
+
 BUILTIN_PERSONAS: tuple[PersonaTemplate, ...] = (
     PersonaTemplate(
         id="default",
