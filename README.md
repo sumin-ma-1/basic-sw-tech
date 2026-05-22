@@ -9,12 +9,13 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 ### 메인 허브
 
 우측 상단의 사용자 프로필은 전역 사용자 정보로 관리되며, 페르소나 설정과 독립적으로 모든 모델 요청에 포함됩니다.
+전역 사용자 정보는 `호칭`, `사용 언어`, `시간대 / 지역`, `간단한 자기소개`로 구성되며, 모든 항목은 선택 입력입니다.
 
 <img width="800" alt="메인 허브 화면" src="https://github.com/user-attachments/assets/2a80c598-40e3-4a81-8d1a-eb194ca2f9bf" />
 
 ### 엑셀 에이전트 모드
 
-엑셀 전문가 페르소나를 기본 적용하고, 사용자 선호 설정이 있는 경우 함께 반영합니다.
+엑셀 전문가 페르소나를 기본 적용하고, 사용자 선호 옵션이 있는 경우 함께 반영합니다.
 
 <img width="800" alt="엑셀 에이전트 모드 화면" src="https://github.com/user-attachments/assets/620a4bee-3871-4512-974c-ae38d99a98df" />
 
@@ -26,6 +27,8 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 ### 작업 파일 다운로드
 
+사용자가 요청한 작업을 처리하기 위해 코드 실행이 필요한 경우, 실행 전에 사용자에게 진행 여부를 확인합니다.
+
 <img width="800" alt="작업 파일 다운로드 화면" src="https://github.com/user-attachments/assets/b77dc5f2-e014-46aa-8123-8eeb28c24984" />
 
 ### 다운로드 완료 화면
@@ -33,6 +36,8 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 <img width="800" alt="다운로드 완료 화면" src="https://github.com/user-attachments/assets/e53f5f7f-ce3d-4382-ad81-f2a3dc2159b2" />
 
 ### 챗 히스토리 관리 및 저장
+
+메인 허브, 엑셀 에이전트 등 모드별로 챗 히스토리를 분리합니다. 사용자는 저장된 히스토리를 다운로드, 이름 수정, 개별 삭제할 수 있으며, 필요에 따라 전체 히스토리도 삭제할 수 있습니다.
 
 <img width="800" alt="챗 히스토리 관리 및 저장" src="https://github.com/user-attachments/assets/6e7ab1de-72ab-49d9-a8ba-01545c27b796" />
 
