@@ -34,13 +34,9 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 <img width="800" alt="챗 히스토리 관리 및 저장" src="https://github.com/user-attachments/assets/6e7ab1de-72ab-49d9-a8ba-01545c27b796" />
 
----
-
 ## 아키텍처 개요
 
 단일 Streamlit 앱(`excel_ai_chat/app.py`)이 UI·상태·라우팅을 담당하고, 도메인 로직은 패키지 모듈로 분리합니다. 외부 의존은 **Ollama HTTP API**와 **로컬 디스크**(`uploads/`, `outputs/`)입니다.
-
----
 
 ## 요구 사항
 
@@ -88,8 +84,6 @@ python -m streamlit run excel_ai_chat/app.py
 ```
 
 브라우저에서 `http://localhost:8502`(또는 설정한 포트)를 엽니다.
-
----
 
 ## 시스템 프롬프트
 
