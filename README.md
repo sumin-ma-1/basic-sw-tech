@@ -2,7 +2,7 @@
 
 Welcome to my basic software technology!
 
-excel-ai-chat은 Ollama 기반 로컬 LLM을 활용해 CSV·Excel 파일을 분석, 수정, 생성, 저장할 수 있는 Streamlit 웹 UI입니다.
+`excel-ai-chat` 은 Ollama 기반 로컬 LLM을 활용해 CSV·Excel 파일을 분석, 수정, 생성, 저장할 수 있는 Streamlit 웹 UI입니다.
 
 ## 사용 화면 캡쳐
 
