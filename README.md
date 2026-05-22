@@ -10,9 +10,11 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 우측 상단의 사용자 프로필은 전역 사용자 정보로 관리되며, 페르소나 설정과 독립적으로 모든 모델 요청에 포함됩니다.
 
+<img width="800" alt="메인 허브 화면" src="https://github.com/user-attachments/assets/2a80c598-40e3-4a81-8d1a-eb194ca2f9bf" />
+
 전역 사용자 정보는 `호칭`, `사용 언어`, `시간대 / 지역`, `간단한 자기소개`로 구성되며, 모든 항목은 선택 입력입니다.
 
-<img width="800" alt="메인 허브 화면" src="https://github.com/user-attachments/assets/2a80c598-40e3-4a81-8d1a-eb194ca2f9bf" />
+<img width="800" alt="프로필" src="https://github.com/user-attachments/assets/e39abc40-10eb-4930-90aa-34a6292027eb" />
 
 ### 엑셀 에이전트 모드
 
@@ -24,7 +26,7 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 `balanced`, `professional`, `friendly` 프리셋 외에도 사용자 취향에 맞는 커스텀 페르소나를 생성, 수정 및 삭제 등 관리 할 수 있습니다.
 
-<img width="800" alt="사용자 전용 페르소나 생성 화면" src="https://github.com/user-attachments/assets/938cd542-b78a-40f8-b1c3-baf35c5fcce5" />
+<img width="800" alt="사용자 전용 페르소나 생성 화면" src="https://github.com/user-attachments/assets/f1bcc5da-2a42-4fea-910f-ce4f9e13c95f" />
 
 ### 작업 파일 다운로드
 
