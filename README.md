@@ -8,6 +8,8 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 ### 메인 허브
 
+우측 상단의 사용자 프로필은 전역 사용자 정보로 관리되며, 페르소나 설정과 독립적으로 모든 모델 요청에 포함됩니다.
+
 <img width="800" alt="메인 허브 화면" src="https://github.com/user-attachments/assets/2a80c598-40e3-4a81-8d1a-eb194ca2f9bf" />
 
 ### 엑셀 에이전트 모드
