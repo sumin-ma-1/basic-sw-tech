@@ -18,7 +18,7 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 ### 사용자 전용 페르소나 생성
 
-`balanced`, `professional`, `friendly` 프리셋 외에도 사용자 취향에 맞는 커스텀 페르소나를 생성할 수 있습니다.
+`balanced`, `professional`, `friendly` 프리셋 외에도 사용자 취향에 맞는 커스텀 페르소나를 생성, 수정 및 삭제 등 관리 할 수 있습니다.
 
 <img width="800" alt="사용자 전용 페르소나 생성 화면" src="https://github.com/user-attachments/assets/938cd542-b78a-40f8-b1c3-baf35c5fcce5" />
 
