@@ -30,6 +30,10 @@ excel-ai-chat은 Ollama와 대화하며 CSV·Excel 등을 분석, 수정, 생성
 
 <img width="800" alt="다운로드 완료 화면" src="https://github.com/user-attachments/assets/e53f5f7f-ce3d-4382-ad81-f2a3dc2159b2" />
 
+### 챗 히스토리 관리 및 저장
+
+<img width="800" alt="챗 히스토리 관리 및 저장" src="https://github.com/user-attachments/assets/6e7ab1de-72ab-49d9-a8ba-01545c27b796" />
+
 ---
 
 ## 아키텍처 개요
